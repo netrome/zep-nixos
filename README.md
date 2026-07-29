@@ -77,8 +77,7 @@ The isolation model, in decreasing order of importance:
 2. **Run agent sessions as `dev`**, not `marten`: no sudo, no read access to
    `marten`'s home (0700). Give `dev` its own fine-grained GitHub PAT scoped to
    the repos it works on, not your main token.
-3. The firewall blocks all inbound except SSH, so an agent-started dev server
-   is not silently internet-facing (the incident's root cause).
+3. The firewall blocks all inbound except SSH.
 
 If stronger isolation is wanted later: per-project `nixos-container` or
 microvm.nix guests are both declarative one-file additions.
