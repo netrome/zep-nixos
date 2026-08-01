@@ -43,6 +43,7 @@ in
   # ~/.ssh/id_rsa were read during the 2026-07-28 incident — never restore them.
   services.openssh = {
     enable = true;
+    ports = [ 8822 ];
     settings = {
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
