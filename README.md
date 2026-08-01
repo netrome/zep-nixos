@@ -46,11 +46,21 @@ nix run github:nix-community/nixos-anywhere -- --flake .#zep root@65.109.124.100
 The machine kexecs a NixOS installer, disko partitions per `disko.nix`,
 the system installs and reboots.
 
-Post-install:
+Post-install — sshd listens on **8822**; the rescue/installer steps above are
+the only time port 22 is used:
 
 ```sh
 ssh-keygen -R 65.109.124.100   # old host keys are gone (deliberately)
-ssh marten@65.109.124.100
+ssh -p 8822 marten@65.109.124.100
+```
+
+Recommended `~/.ssh/config` entry on the laptop, used by the deploy command below:
+
+```
+Host zep
+  HostName 65.109.124.100
+  Port 8822
+  User marten
 ```
 
 ## Making changes
@@ -58,7 +68,7 @@ ssh marten@65.109.124.100
 Edit, commit, then from the laptop (or any clone):
 
 ```sh
-nixos-rebuild switch --flake .#zep --target-host marten@65.109.124.100 --use-remote-sudo
+nixos-rebuild switch --flake .#zep --target-host zep --use-remote-sudo
 ```
 
 Adding a public service later = declare it in `configuration.nix` **and** open
