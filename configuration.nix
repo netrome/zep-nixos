@@ -109,7 +109,7 @@ in
     tree
     fastfetch
     tokei
-    mindex.packages.${pkgs.system}.default
+    mindex.packages.${pkgs.stdenv.hostPlatform.system}.default
   ];
 
   environment.variables = {

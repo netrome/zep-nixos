@@ -18,6 +18,7 @@
         ./disko.nix
         ./hardware.nix
         ./configuration.nix
+        ./mindex.nix
       ];
     };
   };
