@@ -51,7 +51,20 @@ in
     };
   };
 
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable =  true;
+  };
+
+  programs.starship.enable = true;
+
+  programs.fzf = {
+    keybindings = true;
+    fuzzyCompletion = true;
+  };
+
+  programs.zoxide.enable = true;
 
   users.users.marten = {
     isNormalUser = true;
@@ -93,6 +106,9 @@ in
     htop
     rsync
     claude-code
+    tree
+    fastfetch
+    tokei
   ];
 
   nixpkgs.config.allowUnfreePredicate =
