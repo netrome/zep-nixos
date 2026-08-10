@@ -66,20 +66,19 @@ in
 
   programs.zoxide.enable = true;
 
-  users.users.marten = {
-    isNormalUser = true;
-    extraGroups = [ "wheel" ];
-    shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = [ sshKey ];
-  };
-
-  # Sandbox account for agent sessions (claude --dangerously-skip-permissions):
-  # no wheel, so no sudo, and home dirs are 0700 so it cannot read marten's files.
-  users.users.dev = {
-    isNormalUser = true;
-    shell = pkgs.zsh;
-    openssh.authorizedKeys.keys = [ sshKey ];
-  };
+  users.users = {
+    marten = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" ];
+      shell = pkgs.zsh;
+      openssh.authorizedKeys.keys = [ sshKey ];
+    };
+  } // lib.genAttrs [ "dev" "dev-near" ] (
+    name: {
+      isNormalUser = true;
+      shell = pkgs.zsh;
+      openssh.authorizedKeys.keys = [ sshKey ];
+  });
 
   # Deploys run as marten via --use-remote-sudo; there is no password on the
   # account, so wheel must sudo without one. Root via SSH stays disabled.
