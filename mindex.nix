@@ -1,5 +1,7 @@
-{ pkgs, lib, mindex, ... }:
+{ config, pkgs, lib, mindex, ... }:
 {
+  age.secrets.mindex-env.file = ./secrets/mindex-env.age;
+
   systemd.services.mindex = {
     description = "martex — mindex serving /home/marten/notes";
     wantedBy = [ "multi-user.target" ];
@@ -14,7 +16,7 @@
         "--auth-cookie-secure"
         "--port 3217"
       ];
-      EnvironmentFile = "/etc/mindex/env";
+      EnvironmentFile = config.age.secrets.mindex-env.path;
       Restart = "on-failure";
     };
   };
