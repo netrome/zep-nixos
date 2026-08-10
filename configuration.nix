@@ -111,6 +111,11 @@ in
     tokei
   ];
 
+  environment.variables = {
+    VISUAL = "hx";
+    EDITOR = "hx";
+  };
+
   nixpkgs.config.allowUnfreePredicate =
     pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
 }
