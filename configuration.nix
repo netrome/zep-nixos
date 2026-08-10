@@ -85,6 +85,7 @@ in
   # account, so wheel must sudo without one. Root via SSH stays disabled.
   security.sudo.wheelNeedsPassword = false;
 
+  nix.settings.trusted-users = [ "marten" ];
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.gc = {
     automatic = true;
