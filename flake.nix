@@ -5,11 +5,14 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    mindex.url = "github:netrome/mindex";
+    mindex.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko }: {
+  outputs = { self, nixpkgs, disko, mindex }: {
     nixosConfigurations.zep = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      specialArgs = { inherit mindex; };
       modules = [
         disko.nixosModules.disko
         ./disko.nix

@@ -20,6 +20,26 @@
         "type": "github"
       }
     },
+    "mindex": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786370439,
+        "narHash": "sha256-DjrVWtdXJvqqFU9pAXIzXGaCad+5oyVSQGJG/Rhe4lY=",
+        "owner": "netrome",
+        "repo": "mindex",
+        "rev": "9a644d16978ee780571d4efe72c30e7c8a7dc436",
+        "type": "github"
+      },
+      "original": {
+        "owner": "netrome",
+        "repo": "mindex",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1785133411,
@@ -39,6 +59,7 @@
     "root": {
       "inputs": {
         "disko": "disko",
+        "mindex": "mindex",
         "nixpkgs": "nixpkgs"
       }
     }

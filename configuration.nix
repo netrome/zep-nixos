@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, mindex, ... }:
 
 let
   # Private key lives on the laptop (edo) and was never on this server.
@@ -109,6 +109,7 @@ in
     tree
     fastfetch
     tokei
+    mindex.packages.${pkgs.system}.default
   ];
 
   environment.variables = {
