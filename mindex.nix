@@ -6,6 +6,9 @@
     description = "martex — mindex serving /home/marten/notes";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
+    environment = {
+      RUST_LOG = "info";
+    };
     serviceConfig = {
       User = "marten";
       Group = "users";
