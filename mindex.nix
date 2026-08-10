@@ -12,6 +12,7 @@
         "--root /home/marten/notes"
         "--app-name martex"
         "--auth-cookie-secure"
+        "--port 3217"
       ];
       EnvironmentFile = "/etc/mindex/env";
       Restart = "on-failure";
@@ -23,7 +24,7 @@
     globalConfig = "admin off";
     enableReload = false;
     virtualHosts."m.blankfors.se".extraConfig = ''
-      reverse_proxy 127.0.0.1:3000
+      reverse_proxy 127.0.0.1:3217
     '';
   };
 
