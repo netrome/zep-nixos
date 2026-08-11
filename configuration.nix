@@ -48,6 +48,7 @@ in
       PasswordAuthentication = false;
       KbdInteractiveAuthentication = false;
       PermitRootLogin = "no";
+      AcceptEnv = [ "COLORTERM" ];
     };
   };
 
