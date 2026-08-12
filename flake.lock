@@ -149,7 +149,29 @@
         "disko": "disko",
         "home-manager": "home-manager_2",
         "mindex": "mindex",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "zink": "zink"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "zink",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786420161,
+        "narHash": "sha256-PU4CY4GUCDFOoS67dGrc/fS6Y+d1cYZSh6nbgYqAAwE=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "3a646bd5daa3af78a78a1cb32329cb72d18fcae0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     },
     "systems": {
@@ -164,6 +186,27 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "zink": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1786546778,
+        "narHash": "sha256-8gvwEvX+OoN3ey5gmtouQNKcliBqVQf4SVZSLq3yBic=",
+        "owner": "netrome",
+        "repo": "zink",
+        "rev": "95c84f65c43b17f653f9bd2187a42ebdf8a7f95c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "netrome",
+        "repo": "zink",
         "type": "github"
       }
     }
