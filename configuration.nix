@@ -118,6 +118,32 @@ in
     EDITOR = "hx";
   };
 
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  home-manager.users.marten = {
+    home.stateVersion = "26.05";
+
+    programs.helix = {
+      enable = true;
+      settings = {
+        theme = "dark_plus";
+        editor = {
+          auto-pairs = false;
+          soft-wrap.enable = true;
+          file-picker.hidden = false;
+          end-of-line-diagnostics = "hint";
+          insert-final-newline = false;
+          cursor-shape = {
+            insert = "bar";
+            normal = "block";
+            select = "underline";
+          };
+          inline-diagnostics.cursor-line = "warning";
+        };
+      };
+    };
+  };
+
   nixpkgs.config.allowUnfreePredicate =
     pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
 }

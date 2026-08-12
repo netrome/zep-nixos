@@ -9,15 +9,18 @@
     mindex.inputs.nixpkgs.follows = "nixpkgs";
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
+    home-manager.url = "github:nix-community/home-manager/release-26.05";
+    home-manager.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko, mindex, agenix }: {
+  outputs = { self, nixpkgs, disko, mindex, agenix, home-manager }: {
     nixosConfigurations.zep = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit mindex; };
       modules = [
         disko.nixosModules.disko
         agenix.nixosModules.default
+        home-manager.nixosModules.home-manager
         ./disko.nix
         ./hardware.nix
         ./configuration.nix
