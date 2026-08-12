@@ -118,6 +118,15 @@ in
     EDITOR = "hx";
   };
 
+  # Machine-wide memory for Claude Code; loaded into every session on this
+  # host regardless of user or repo.
+  environment.etc."claude-code/CLAUDE.md".text = ''
+    This machine (zep) is a headless NixOS server. Missing commands are normal:
+    use `nix run`/`nix shell nixpkgs#<pkg>` for one-offs, `nix develop` for project
+    dev shells, and propose config changes rather than installing imperatively.
+    The system is managed declaratively — don't edit generated files under /etc.
+  '';
+
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
   home-manager.users = lib.genAttrs [ "marten" "dev" "dev-near" ] (name: {
