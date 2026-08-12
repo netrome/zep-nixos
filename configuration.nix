@@ -120,7 +120,7 @@ in
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users.marten = {
+  home-manager.users = lib.genAttrs [ "marten" "dev" "dev-near" ] (name: {
     home.stateVersion = "26.05";
 
     programs.helix = {
@@ -142,7 +142,7 @@ in
         };
       };
     };
-  };
+  });
 
   nixpkgs.config.allowUnfreePredicate =
     pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
