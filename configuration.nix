@@ -151,6 +151,18 @@ in
         };
       };
     };
+
+    # Drop git's default -X so less uses the alternate screen, letting the
+    # terminal's alternate scroll mode translate the wheel into arrow keys.
+    programs.git = {
+      enable = true;
+      settings.core.pager = "less -RF";
+    };
+
+    programs.tmux = {
+      enable = true;
+      mouse = true;
+    };
   });
 
   nixpkgs.config.allowUnfreePredicate =
