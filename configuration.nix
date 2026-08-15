@@ -3,6 +3,13 @@
 let
   # Private key lives on the laptop (edo) and was never on this server.
   sshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAl4uMk/HNkQauwnCoX4nBWmEp0Qka4rQ7YNxBET/9w8 marten@edo";
+
+  # Ad-hoc interpreter for all users. Defined here so the `python` shim below
+  # points at the same wrapped environment.
+  pythonEnv = pkgs.python3.withPackages (ps: with ps; [
+    requests
+    ipython
+  ]);
 in
 {
   networking.hostName = "zep";
@@ -111,6 +118,10 @@ in
     fastfetch
     tokei
     mindex.packages.${pkgs.stdenv.hostPlatform.system}.default
+    pythonEnv
+    # nixpkgs only ships a `python3` binary; keep a `python` alias for
+    # tools and muscle memory that expect the bare name.
+    (writeShellScriptBin "python" ''exec ${pythonEnv}/bin/python3 "$@"'')
   ];
 
   environment.variables = {
