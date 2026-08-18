@@ -1,5 +1,5 @@
 {
-  description = "NixOS configuration for zep (Hetzner dedicated, AMD 7950X3D)";
+  description = "NixOS configurations for zep (Hetzner dedicated) and laptop (TUXEDO InfinityBook 15)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -28,6 +28,16 @@
         ./hosts/zep/configuration.nix
         ./hosts/zep/mindex.nix
         ./hosts/zep/zink.nix
+      ];
+    };
+
+    nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        disko.nixosModules.disko
+        ./hosts/laptop/disko.nix
+        ./hosts/laptop/hardware.nix
+        ./hosts/laptop/configuration.nix
       ];
     };
   };
