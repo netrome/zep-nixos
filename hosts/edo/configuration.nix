@@ -5,7 +5,7 @@
 
   # Keeping hostname == flake attribute name lets `nixos-rebuild --flake .`
   # pick the right config automatically. Rename both together if you rename.
-  networking.hostName = "laptop";
+  networking.hostName = "edo";
   networking.networkmanager.enable = true;
 
   time.timeZone = "Europe/Stockholm";

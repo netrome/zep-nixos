@@ -1,5 +1,5 @@
 {
-  description = "NixOS configurations for zep (Hetzner dedicated) and laptop (TUXEDO InfinityBook 15)";
+  description = "NixOS configurations for zep (Hetzner dedicated) and edo (TUXEDO InfinityBook 15)";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
@@ -31,13 +31,13 @@
       ];
     };
 
-    nixosConfigurations.laptop = nixpkgs.lib.nixosSystem {
+    nixosConfigurations.edo = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
         disko.nixosModules.disko
-        ./hosts/laptop/disko.nix
-        ./hosts/laptop/hardware.nix
-        ./hosts/laptop/configuration.nix
+        ./hosts/edo/disko.nix
+        ./hosts/edo/hardware.nix
+        ./hosts/edo/configuration.nix
       ];
     };
   };
