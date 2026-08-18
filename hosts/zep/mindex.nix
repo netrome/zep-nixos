@@ -1,6 +1,6 @@
 { config, pkgs, lib, mindex, ... }:
 {
-  age.secrets.mindex-env.file = ./secrets/mindex-env.age;
+  age.secrets.mindex-env.file = ../../secrets/mindex-env.age;
 
   systemd.services.mindex = {
     description = "martex — mindex serving /home/marten/notes";

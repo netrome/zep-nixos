@@ -23,11 +23,11 @@
         disko.nixosModules.disko
         agenix.nixosModules.default
         home-manager.nixosModules.home-manager
-        ./disko.nix
-        ./hardware.nix
-        ./configuration.nix
-        ./mindex.nix
-        ./zink.nix
+        ./hosts/zep/disko.nix
+        ./hosts/zep/hardware.nix
+        ./hosts/zep/configuration.nix
+        ./hosts/zep/mindex.nix
+        ./hosts/zep/zink.nix
       ];
     };
   };
