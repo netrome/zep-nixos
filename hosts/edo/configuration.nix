@@ -70,6 +70,12 @@
     firefox
     ripgrep
     fd
+    jq
+    curl
+    htop
+    tree
+    fastfetch
+    tokei
     claude-code
     # Referenced by hyprland.lua keybindings:
     kdePackages.dolphin # Super+E
