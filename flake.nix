@@ -35,6 +35,7 @@
       system = "x86_64-linux";
       modules = [
         disko.nixosModules.disko
+        home-manager.nixosModules.home-manager
         ./hosts/edo/disko.nix
         ./hosts/edo/hardware.nix
         ./hosts/edo/configuration.nix

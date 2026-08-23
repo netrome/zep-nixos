@@ -30,7 +30,21 @@
     shell = pkgs.zsh;
     initialPassword = "changeme";
   };
-  programs.zsh.enable = true;
+  # Same shell stack as zep.
+  programs.zsh = {
+    enable = true;
+    autosuggestions.enable = true;
+    syntaxHighlighting.enable = true;
+  };
+
+  programs.starship.enable = true;
+
+  programs.fzf = {
+    keybindings = true;
+    fuzzyCompletion = true;
+  };
+
+  programs.zoxide.enable = true;
 
   programs.hyprland.enable = true;
 
@@ -39,7 +53,53 @@
     git
     vim
     firefox
+    ripgrep
+    fd
   ];
+
+  environment.variables = {
+    VISUAL = "hx";
+    EDITOR = "hx";
+  };
+
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = true;
+  home-manager.users.marten = {
+    home.stateVersion = "26.05";
+
+    # Same helix setup as zep.
+    programs.helix = {
+      enable = true;
+      settings = {
+        theme = "dark_plus";
+        editor = {
+          auto-pairs = false;
+          soft-wrap.enable = true;
+          file-picker.hidden = false;
+          end-of-line-diagnostics = "hint";
+          insert-final-newline = false;
+          cursor-shape = {
+            insert = "bar";
+            normal = "block";
+            select = "underline";
+          };
+          inline-diagnostics.cursor-line = "warning";
+        };
+      };
+    };
+
+    # Drop git's default -X so less uses the alternate screen, letting the
+    # terminal's alternate scroll mode translate the wheel into arrow keys.
+    programs.git = {
+      enable = true;
+      settings.core.pager = "less -RF";
+    };
+
+    programs.tmux = {
+      enable = true;
+      mouse = true;
+    };
+  };
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
