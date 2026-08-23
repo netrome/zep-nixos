@@ -337,6 +337,15 @@ bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"), "Reload config")
 -- Guarded: quitting the session should not be one unconfirmed keypress away.
 bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hypr-exit"),      "Exit Hyprland (asks first)")
 
+---- Screenshots ----
+-- Print-key based, as on Regolith. Unmodified Print is the common case
+-- (grab a region, paste it somewhere); Ctrl additionally writes a file.
+bind("Print",                hl.dsp.exec_cmd("screenshot region"),      "Screenshot: region to clipboard")
+bind("SHIFT + Print",        hl.dsp.exec_cmd("screenshot output"),      "Screenshot: whole screen to clipboard")
+bind("ALT + Print",          hl.dsp.exec_cmd("screenshot window"),      "Screenshot: active window to clipboard")
+bind("CTRL + Print",         hl.dsp.exec_cmd("screenshot region save"), "Screenshot: region to file")
+bind("CTRL + SHIFT + Print", hl.dsp.exec_cmd("screenshot output save"), "Screenshot: whole screen to file")
+
 ---- Mouse ----
 -- Scroll through existing workspaces with mod + scroll
 bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), "Next workspace")
