@@ -22,6 +22,16 @@
   # Fan control, keyboard backlight, etc. for TUXEDO hardware
   hardware.tuxedo-drivers.enable = true;
 
+  # The default is HandlePowerKey=poweroff — one unconfirmed press and the
+  # machine is gone. Hyprland binds the short press to the power menu instead
+  # (it sees the button as the "power-button" keyboard); a long press still
+  # powers off directly, and holding it longer always triggers the firmware
+  # cut-off regardless of any of this.
+  services.logind.settings.Login = {
+    HandlePowerKey = "ignore";
+    HandlePowerKeyLongPress = "poweroff";
+  };
+
   zramSwap.enable = true;
 
   users.users.marten = {
@@ -106,9 +116,9 @@
     })
 
     (pkgs.writeShellApplication {
-      name = "hypr-exit"; # Super+Shift+E
-      runtimeInputs = with pkgs; [ fuzzel hyprland ];
-      text = builtins.readFile ./scripts/hypr-exit.sh;
+      name = "power-menu"; # Super+Shift+E and the physical power key
+      runtimeInputs = with pkgs; [ fuzzel hyprland systemd ];
+      text = builtins.readFile ./scripts/power-menu.sh;
     })
 
     # Wayland clipboard from the command line (wl-copy/wl-paste)

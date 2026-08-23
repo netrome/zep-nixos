@@ -334,8 +334,10 @@ bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }),
 -- signal and runs the locker, which keeps logind's LockedHint accurate.
 bind(mod .. " + Escape",    hl.dsp.exec_cmd("loginctl lock-session"), "Lock screen")
 bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"), "Reload config")
--- Guarded: quitting the session should not be one unconfirmed keypress away.
-bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hypr-exit"),      "Exit Hyprland (asks first)")
+-- Guarded: nothing session-ending should be one unconfirmed keypress away.
+-- The physical power key lands here too; logind ignores its short press.
+bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("power-menu"), "Power menu")
+bind("XF86PowerOff",        hl.dsp.exec_cmd("power-menu"), "Power menu")
 
 ---- Notifications ----
 bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("makoctl mode -t do-not-disturb"), "Toggle do-not-disturb")
