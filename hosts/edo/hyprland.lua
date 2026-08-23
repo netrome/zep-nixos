@@ -15,11 +15,44 @@
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+--
+-- Hyprland reapplies these on hotplug, so no kanshi is needed; a second daemon
+-- would only race this one for control of the outputs.
+--
+-- Catch-all first — later rules override it, so anything unknown still lights up.
 hl.monitor({
     output   = "",
     mode     = "preferred",
     position = "auto",
     scale    = "auto",
+})
+
+-- Home desk: 34" ultrawide to the LEFT of the laptop.
+--
+-- Matched on description rather than "DP-3" because connector numbering can
+-- change between plug-ins; the description is stable per physical monitor.
+--
+-- 50Hz is the ceiling at native resolution over the current cable: the mode
+-- list (4K capped at 30, 3440x1440 capped at 50, 1080p up to 120) is the
+-- signature of a bandwidth-limited link, most likely USB-C DP alt mode
+-- negotiating 2 lanes instead of 4. The panel itself does 144Hz. If a
+-- different cable or port ever gives 4 lanes, raise this — 3440x1440@100 and
+-- above should then appear in `hyprctl monitors all`.
+hl.monitor({
+    output   = "desc:Microstep MSI MAG342CQR DB6H261C02870",
+    mode     = "3440x1440@50",
+    position = "0x0",
+    scale    = 1,
+})
+
+-- Laptop panel to the right of it. y=440 bottom-aligns the two (the ultrawide
+-- is 1440 tall, this panel is 1600/1.6 = 1000 logical), which matches how they
+-- physically sit on the desk. Use y=0 to top-align instead.
+hl.monitor({
+    output   = "eDP-1",
+    mode     = "2560x1600@240",
+    position = "3440x440",
+    scale    = 1.6,
 })
 
 
