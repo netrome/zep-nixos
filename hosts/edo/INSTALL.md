@@ -76,8 +76,13 @@ Each phase notes where you're standing when you run it.
 
    ```sh
    nix shell nixpkgs#nixos-install-tools
-   sudo env "PATH=$PATH" nixos-install --flake .#edo
+   sudo env "PATH=$PATH:/run/current-system/sw/bin:/nix/var/nix/profiles/system/sw/bin" \
+     nixos-install --flake .#edo
    ```
+
+   The appended paths don't exist on TuxedoOS, but *inside* the install
+   chroot they resolve to the new system's tools — without them the
+   bootloader step dies with `mount: command not found`.
 
    Thanks to the pre-build this is mostly copying. At the end it asks for a
    **root password** — set one; it's the fallback login.
