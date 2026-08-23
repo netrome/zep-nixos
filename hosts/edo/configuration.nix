@@ -129,6 +129,10 @@
   # anything in the bar rendered as tofu. This covers both.
   fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
 
+  # Required for the dconf database that carries the dark-mode setting. Without
+  # it home-manager writes the keys but nothing reads them back.
+  programs.dconf.enable = true;
+
   # Slack and Zulip are Electron. Without this they run under XWayland, which on
   # this panel means being upscaled from 1x to the 1.6 fractional scale — visibly
   # blurry. Native Wayland also gets them proper input handling and PipeWire
@@ -268,6 +272,47 @@
           }
         ];
       };
+    };
+
+    # Dark theme. Four mechanisms have to agree or half the apps come out light:
+    #
+    #   GTK3      gtk-application-prefer-dark-theme in settings.ini
+    #   GTK4/adw  gtk-interface-color-scheme (GTK4 ignores gtk-theme-name)
+    #   portal    dconf org.gnome.desktop.interface color-scheme, which
+    #             xdg-desktop-portal-gtk republishes as
+    #             org.freedesktop.appearance — this is the one Electron (Slack,
+    #             Zulip) and Firefox actually read
+    #   Qt        QT_QPA_PLATFORMTHEME, so Telegram follows GTK
+    #
+    # home-manager's gtk module drives the first three off `colorScheme`.
+    # adw-gtk3-dark rather than Adwaita-dark so GTK3 apps match libadwaita ones.
+    gtk = lib.mkIf (name == "marten") {
+      enable = true;
+      colorScheme = "dark";
+      theme = {
+        name = "adw-gtk3-dark";
+        package = pkgs.adw-gtk3;
+      };
+      iconTheme = {
+        name = "Papirus-Dark";
+        package = pkgs.papirus-icon-theme;
+      };
+    };
+
+    qt = lib.mkIf (name == "marten") {
+      enable = true;
+      platformTheme.name = "gtk3";
+    };
+
+    # Also fixes waybar's "Unable to load hand2 from the cursor theme" — nothing
+    # declared a cursor theme before. x11.enable is what exports XCURSOR_THEME.
+    home.pointerCursor = lib.mkIf (name == "marten") {
+      name = "Bibata-Modern-Classic";
+      package = pkgs.bibata-cursors;
+      size = 24;
+      gtk.enable = true;
+      x11.enable = true;
+      hyprcursor.enable = true;
     };
 
     # Notification daemon. mako over dunst/swaync: Wayland-native, tiny, and its

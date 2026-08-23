@@ -88,7 +88,11 @@ local menu        = "fuzzel"
 
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Environment-variables/
 
+-- Theme name must be set here too, not just in home-manager: the compositor
+-- reads it at startup, before any session variables from the shell profile.
+hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
 hl.env("XCURSOR_SIZE", "24")
+hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Classic")
 hl.env("HYPRCURSOR_SIZE", "24")
 
 
