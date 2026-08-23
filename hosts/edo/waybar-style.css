@@ -1,0 +1,109 @@
+/* Accent colours match the Hyprland active-border gradient in hyprland.lua
+   (#33ccff → #00ff99), so the bar and the window borders read as one thing. */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", monospace;
+  font-size: 13px;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+window#waybar {
+  background: rgba(26, 26, 26, 0.92);
+  color: #e6e6e6;
+}
+
+/* Every module gets the same pill treatment. */
+#workspaces,
+#submap,
+#tray,
+#idle_inhibitor,
+#pulseaudio,
+#backlight,
+#network,
+#battery,
+#clock {
+  background: rgba(89, 89, 89, 0.25);
+  padding: 0 10px;
+  margin: 4px 2px;
+  border-radius: 8px;
+}
+
+#workspaces {
+  padding: 0 4px;
+}
+
+#workspaces button {
+  padding: 0 7px;
+  color: #8a8a8a;
+  background: transparent;
+  border-radius: 6px;
+}
+
+#workspaces button.active {
+  color: #1a1a1a;
+  background: linear-gradient(45deg, #33ccff, #00ff99);
+}
+
+#workspaces button.urgent {
+  color: #1a1a1a;
+  background: #ffcc00;
+}
+
+#workspaces button:hover {
+  color: #ffffff;
+  background: rgba(51, 204, 255, 0.25);
+}
+
+#window {
+  color: #b8b8b8;
+}
+
+/* Highlighted because being in a submap is modal state — you want to notice. */
+#submap {
+  background: #33ccff;
+  color: #1a1a1a;
+  font-weight: bold;
+}
+
+#battery.warning {
+  background: #ffcc00;
+  color: #1a1a1a;
+}
+
+#battery.critical {
+  background: #ff5555;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+#battery.charging {
+  background: rgba(0, 255, 153, 0.35);
+}
+
+/* Deliberately loud: this one suppresses the idle lock, so it should not be
+   possible to leave it on by accident. */
+#idle_inhibitor.activated {
+  background: #ffcc00;
+  color: #1a1a1a;
+}
+
+#network.disconnected {
+  color: #ff5555;
+}
+
+#tray menu {
+  background: #1a1a1a;
+  color: #e6e6e6;
+}
+
+tooltip {
+  background: rgba(26, 26, 26, 0.97);
+  border: 1px solid #33ccff;
+  border-radius: 8px;
+}
+
+tooltip label {
+  color: #e6e6e6;
+}

@@ -108,6 +108,10 @@
     wl-clipboard
   ];
 
+  # Nothing on the system had icon glyphs, so starship's git-branch symbol and
+  # anything in the bar rendered as tofu. This covers both.
+  fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+
   environment.variables = {
     VISUAL = "hx";
     EDITOR = "hx";
@@ -233,6 +237,99 @@
           }
         ];
       };
+    };
+
+    programs.waybar = lib.mkIf (name == "marten") {
+      enable = true;
+      systemd.enable = true; # starts with hyprland-session.target, like hypridle
+
+      settings.mainBar = {
+        layer = "top";
+        position = "top";
+        height = 30;
+        spacing = 6;
+
+        modules-left = [ "hyprland/workspaces" "hyprland/submap" ];
+        modules-center = [ "hyprland/window" ];
+        modules-right = [
+          "tray"
+          "idle_inhibitor"
+          "pulseaudio"
+          "backlight"
+          "network"
+          "battery"
+          "clock"
+        ];
+
+        "hyprland/workspaces".on-click = "activate";
+
+        # Shows "resize" while Super+R's submap is active, so the modal state
+        # is visible rather than something you discover by pressing keys.
+        "hyprland/submap" = {
+          format = "󰌌 {}";
+          tooltip = false;
+        };
+
+        "hyprland/window" = {
+          format = "{title}";
+          max-length = 60;
+          separate-outputs = true;
+        };
+
+        tray.spacing = 10; # Slack et al. live here
+
+        # Manual override for the idle lock. Uses the Wayland idle-inhibit
+        # protocol — the same channel hypridle honours — so this is a supported
+        # "don't lock right now", not a hack.
+        idle_inhibitor = {
+          format = "{icon}";
+          format-icons = {
+            activated = "󰅶";
+            deactivated = "󰛊";
+          };
+          tooltip-format-activated = "Idle inhibited — screen will not lock";
+          tooltip-format-deactivated = "Idle lock active";
+        };
+
+        pulseaudio = {
+          format = "{icon} {volume}%";
+          format-muted = "󰝟 muted";
+          format-icons.default = [ "󰕿" "󰖀" "󰕾" ];
+          on-click = "${pkgs.wireplumber}/bin/wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle";
+        };
+
+        backlight = {
+          device = "intel_backlight";
+          format = "󰃟 {percent}%";
+        };
+
+        network = {
+          format-wifi = "󰤨 {essid}";
+          format-ethernet = "󰈀 wired";
+          format-disconnected = "󰤭 offline";
+          tooltip-format = "{ifname}: {ipaddr}";
+        };
+
+        battery = {
+          states = {
+            warning = 30;
+            critical = 15;
+          };
+          format = "{icon} {capacity}%";
+          format-charging = "󰂄 {capacity}%";
+          format-plugged = "󰚥 {capacity}%";
+          format-icons = [ "󰁺" "󰁻" "󰁼" "󰁽" "󰁾" "󰁿" "󰂀" "󰂁" "󰂂" "󰁹" ];
+          tooltip-format = "{timeTo} — {power}W";
+        };
+
+        clock = {
+          format = "{:%H:%M}";
+          format-alt = "{:%Y-%m-%d %H:%M}"; # click to toggle
+          tooltip-format = "<tt>{calendar}</tt>";
+        };
+      };
+
+      style = builtins.readFile ./waybar-style.css;
     };
 
     # Application launcher, on Super+Space and Super+D.
