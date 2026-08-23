@@ -55,6 +55,14 @@
 
   programs.hyprland.enable = true;
 
+  # Sound server; the hyprland.lua volume keys drive it via wpctl.
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+  };
+  security.rtkit.enable = true;
+
   environment.systemPackages = with pkgs; [
     alacritty
     git
@@ -63,6 +71,13 @@
     ripgrep
     fd
     claude-code
+    # Referenced by hyprland.lua keybindings:
+    kdePackages.dolphin # Super+E
+    hyprlauncher # Super+R
+    brightnessctl # XF86MonBrightness keys
+    playerctl # XF86Audio media keys
+    # Wayland clipboard from the command line (wl-copy/wl-paste)
+    wl-clipboard
   ];
 
   environment.variables = {
