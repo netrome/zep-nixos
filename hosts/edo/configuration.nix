@@ -195,7 +195,10 @@
           # consumers (compliance tooling, chrome.idle) can actually see it.
           lock_cmd = "${pkgs.procps}/bin/pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock";
           before_sleep_cmd = "${pkgs.systemd}/bin/loginctl lock-session";
-          after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
+          # Dispatchers go through hyprctl as *Lua*, not legacy names: this is a
+          # Lua config, so `hyprctl dispatch dpms on` is a syntax error that
+          # fails silently. hypridle's sample config assumes hyprlang.
+          after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms(\"on\")'";
 
           # Explicit rather than defaulted: honouring these is the entire reason
           # for picking hypridle. Flipping any to true reintroduces the Regolith
@@ -227,8 +230,8 @@
           # 11 min: display off.
           {
             timeout = 660;
-            on-timeout = "${pkgs.hyprland}/bin/hyprctl dispatch dpms off";
-            on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
+            on-timeout = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms(\"off\")'";
+            on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms(\"on\")'";
           }
           # 30 min: suspend. before_sleep_cmd locks first.
           {
