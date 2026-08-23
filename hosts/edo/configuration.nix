@@ -55,6 +55,10 @@
 
   programs.hyprland.enable = true;
 
+  # Installs hyprlock and, crucially, registers security.pam.services.hyprlock —
+  # without the PAM service the lock screen cannot authenticate you back in.
+  programs.hyprlock.enable = true;
+
   # Sound server; the hyprland.lua volume keys drive it via wpctl.
   services.pipewire = {
     enable = true;
@@ -123,6 +127,101 @@
       # value would feed Lua to the hyprlang parser.
       configType = "lua";
       extraConfig = builtins.readFile ./hyprland.lua;
+    };
+
+    # Screen lock. The NixOS programs.hyprlock module above installs the package
+    # and the PAM service; null keeps home-manager from adding a second copy.
+    programs.hyprlock = lib.mkIf (name == "marten") {
+      enable = true;
+      package = null;
+      settings = {
+        general = {
+          hide_cursor = true;
+          grace = 0; # no "unlock without password" window
+        };
+
+        # Blurred snapshot of the session, so no wallpaper file is needed yet.
+        background = [{
+          path = "screenshot";
+          blur_passes = 3;
+          blur_size = 8;
+        }];
+
+        input-field = [{
+          size = "300, 50";
+          position = "0, -80";
+          halign = "center";
+          valign = "center";
+          outline_thickness = 2;
+          dots_center = true;
+          fade_on_empty = false;
+          placeholder_text = "<i>Password…</i>";
+        }];
+
+        label = [{
+          text = "$TIME";
+          font_size = 64;
+          position = "0, 80";
+          halign = "center";
+          valign = "center";
+        }];
+      };
+    };
+
+    # Idle daemon. Chosen over swayidle because it honours all three inhibit
+    # channels; swayidle cannot see org.freedesktop.ScreenSaver, which is one of
+    # the two backends Firefox uses for the Screen Wake Lock API that Meet needs.
+    services.hypridle = lib.mkIf (name == "marten") {
+      enable = true;
+      settings = {
+        general = {
+          # Everything locks via `loginctl lock-session` rather than by running
+          # hyprlock directly, so logind's LockedHint stays truthful and D-Bus
+          # consumers (compliance tooling, chrome.idle) can actually see it.
+          lock_cmd = "${pkgs.procps}/bin/pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock";
+          before_sleep_cmd = "${pkgs.systemd}/bin/loginctl lock-session";
+          after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
+
+          # Explicit rather than defaulted: honouring these is the entire reason
+          # for picking hypridle. Flipping any to true reintroduces the Regolith
+          # failure mode of locking mid-meeting.
+          ignore_dbus_inhibit = false;
+          ignore_systemd_inhibit = false;
+          ignore_wayland_inhibit = false;
+        };
+
+        listener = [
+          # 5 min: dim as a warning shot. Restored on any input.
+          {
+            timeout = 300;
+            on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 10";
+            on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -r";
+          }
+          # Device is white:kbd_backlight on this machine — the upstream sample
+          # config hardcodes rgb:kbd_backlight, which would fail silently here.
+          {
+            timeout = 300;
+            on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -sd white:kbd_backlight set 0";
+            on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -rd white:kbd_backlight";
+          }
+          # 10 min: lock.
+          {
+            timeout = 600;
+            on-timeout = "${pkgs.systemd}/bin/loginctl lock-session";
+          }
+          # 11 min: display off.
+          {
+            timeout = 660;
+            on-timeout = "${pkgs.hyprland}/bin/hyprctl dispatch dpms off";
+            on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
+          }
+          # 30 min: suspend. before_sleep_cmd locks first.
+          {
+            timeout = 1800;
+            on-timeout = "${pkgs.systemd}/bin/systemctl suspend";
+          }
+        ];
+      };
     };
 
     # Application launcher, on Super+Space and Super+D.

@@ -330,6 +330,9 @@ bind(mod .. " + S",         hl.dsp.workspace.toggle_special("magic"),           
 bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }), "Move window to scratchpad")
 
 ---- Session ----
+-- Via loginctl rather than hyprlock directly: hypridle catches the logind Lock
+-- signal and runs the locker, which keeps logind's LockedHint accurate.
+bind(mod .. " + Escape",    hl.dsp.exec_cmd("loginctl lock-session"), "Lock screen")
 bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"), "Reload config")
 -- Guarded: quitting the session should not be one unconfirmed keypress away.
 bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hypr-exit"),      "Exit Hyprland (asks first)")
