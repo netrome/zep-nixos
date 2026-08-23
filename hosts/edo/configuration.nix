@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -30,6 +30,13 @@
     shell = pkgs.zsh;
     initialPassword = "changeme";
   };
+
+  # Secondary account for running claude-code, like on zep. No password —
+  # reach it with `sudo -iu dev`.
+  users.users.dev = {
+    isNormalUser = true;
+    shell = pkgs.zsh;
+  };
   # Same shell stack as zep.
   programs.zsh = {
     enable = true;
@@ -55,6 +62,7 @@
     firefox
     ripgrep
     fd
+    claude-code
   ];
 
   environment.variables = {
@@ -62,10 +70,29 @@
     EDITOR = "hx";
   };
 
+  # Machine-wide memory for Claude Code; loaded into every session on this
+  # host regardless of user or repo.
+  environment.etc."claude-code/CLAUDE.md".text = ''
+    This machine (edo) is a NixOS laptop managed declaratively from the
+    zep-nixos flake repo. Don't install software imperatively or edit
+    generated files under /etc — propose changes to the flake instead.
+  '';
+
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users.marten = {
+  home-manager.users = lib.genAttrs [ "marten" "dev" ] (name: {
     home.stateVersion = "26.05";
+
+    # marten-only: dev doesn't run a graphical session. The config itself
+    # lives in ./hyprland.lua; edits apply via nixos-rebuild + hyprctl reload.
+    wayland.windowManager.hyprland = lib.mkIf (name == "marten") {
+      enable = true;
+      # The NixOS module (programs.hyprland) already installs Hyprland and
+      # its xdg portal; null stops home-manager from pulling in second copies.
+      package = null;
+      portalPackage = null;
+      extraConfig = builtins.readFile ./hyprland.lua;
+    };
 
     # Same helix setup as zep.
     programs.helix = {
@@ -99,7 +126,10 @@
       enable = true;
       mouse = true;
     };
-  };
+  });
+
+  nixpkgs.config.allowUnfreePredicate =
+    pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
