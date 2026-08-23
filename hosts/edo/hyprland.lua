@@ -337,6 +337,10 @@ bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"), "Reload config")
 -- Guarded: quitting the session should not be one unconfirmed keypress away.
 bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hypr-exit"),      "Exit Hyprland (asks first)")
 
+---- Notifications ----
+bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("makoctl mode -t do-not-disturb"), "Toggle do-not-disturb")
+bind(mod .. " + N",         hl.dsp.exec_cmd("makoctl dismiss --all"),           "Dismiss all notifications")
+
 ---- Screenshots ----
 -- Print-key based, as on Regolith. Unmodified Print is the common case
 -- (grab a region, paste it somewhere); Ctrl additionally writes a file.

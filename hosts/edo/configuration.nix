@@ -89,6 +89,13 @@
     grim # screenshots; also on PATH for ad-hoc use
     slurp # region selection for the above
 
+    # Chat. All three put an icon in waybar's tray module.
+    slack # unfree — see allowUnfreePredicate below
+    telegram-desktop
+    zulip
+
+    libnotify # notify-send, for testing that mako is alive
+
     # Scripts live in ./scripts/ rather than inline. writeShellApplication puts
     # runtimeInputs on PATH, so those files are plain shell with no Nix
     # interpolation — and it runs shellcheck on them at build time.
@@ -111,6 +118,17 @@
   # Nothing on the system had icon glyphs, so starship's git-branch symbol and
   # anything in the bar rendered as tofu. This covers both.
   fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+
+  # Slack and Zulip are Electron. Without this they run under XWayland, which on
+  # this panel means being upscaled from 1x to the 1.6 fractional scale — visibly
+  # blurry. Native Wayland also gets them proper input handling and PipeWire
+  # screen sharing through the portal.
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
+  # xdg-desktop-portal-hyprland (from programs.hyprland) handles screencast, but
+  # not file chooser dialogs — without a GTK portal, "attach a file" in Slack
+  # falls back to a poor or missing picker.
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
   environment.variables = {
     VISUAL = "hx";
@@ -239,6 +257,39 @@
             on-timeout = "${pkgs.systemd}/bin/systemctl suspend";
           }
         ];
+      };
+    };
+
+    # Notification daemon. mako over dunst/swaync: Wayland-native, tiny, and its
+    # config is a dozen declarative lines. swaync would add a notification
+    # *centre* with scrollback — worth revisiting if Slack pings get missed.
+    services.mako = lib.mkIf (name == "marten") {
+      enable = true;
+      settings = {
+        font = "JetBrainsMono Nerd Font 11";
+        width = 380;
+        margin = "10";
+        padding = "12,16";
+        border-size = 2;
+        border-radius = 8;
+        background-color = "#1a1a1aeb";
+        text-color = "#e6e6e6";
+        border-color = "#33ccff";
+        progress-color = "over #00ff99";
+        default-timeout = 6000;
+        anchor = "top-right";
+        max-visible = 5;
+
+        # Critical notifications stay until dismissed rather than timing out.
+        "urgency=critical" = {
+          border-color = "#ff5555";
+          default-timeout = 0;
+        };
+
+        # Backs the Super+Shift+N do-not-disturb toggle.
+        "mode=do-not-disturb" = {
+          invisible = 1;
+        };
       };
     };
 
@@ -389,7 +440,7 @@
   });
 
   nixpkgs.config.allowUnfreePredicate =
-    pkg: builtins.elem (lib.getName pkg) [ "claude-code" ];
+    pkg: builtins.elem (lib.getName pkg) [ "claude-code" "slack" ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
