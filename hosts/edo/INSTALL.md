@@ -57,8 +57,12 @@ Each phase notes where you're standing when you run it.
 2. **Point of no return** — erases the 4TB drive:
 
    ```sh
-   sudo nix run github:nix-community/disko -- --mode disko ./hosts/edo/disko.nix
+   sudo env "PATH=$PATH" nix run --extra-experimental-features "nix-command flakes" \
+     github:nix-community/disko -- --mode disko ./hosts/edo/disko.nix
    ```
+
+   The `env` wrapper lets root find the nix tools, and the flags are needed
+   because root doesn't read your user's nix.conf.
 
    It prompts for the LUKS passphrase. Use letters and digits only (the
    early-boot prompt may run a US keymap, and å ä ö and most symbols move
