@@ -30,7 +30,7 @@ hl.monitor({
 -- Set programs that you use
 local terminal    = "alacritty"
 local fileManager = "dolphin"
-local menu        = "hyprlauncher"
+local menu        = "fuzzel"
 
 
 -------------------
@@ -251,44 +251,97 @@ hl.device({
 ---- KEYBINDINGS ----
 ---------------------
 
-local mainMod = "SUPER" -- Sets "Windows" key as main modifier
+-- This section deliberately does NOT follow Hyprland's example config, which
+-- is an arbitrary starting point rather than a convention (Super+Q for a
+-- terminal, Super+M to quit with no confirmation). It follows i3/sway instead:
+-- that vocabulary is what Regolith is built on, what most tiling-WM cheat
+-- sheets assume, and it is internally consistent — Shift moves whatever the
+-- unshifted key focuses.
+--
+-- Every bind carries a description, so `hyprctl binds` prints a cheat sheet of
+-- exactly what is live. That is the authoritative list; this file is the source.
 
--- Example binds, see https://wiki.hypr.land/Configuring/Basics/Binds/ for more
-hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
-local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
--- closeWindowBind:set_enabled(false)
-hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
-hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+local mod = "SUPER" -- Sets "Windows" key as main modifier
 
--- Move focus with mainMod + arrow keys
-hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
-
--- Switch workspaces with mainMod + [0-9]
--- Move active window to a workspace with mainMod + SHIFT + [0-9]
-for i = 1, 10 do
-    local key = i % 10 -- 10 maps to key 0
-    hl.bind(mainMod .. " + " .. key,             hl.dsp.focus({ workspace = i}))
-    hl.bind(mainMod .. " + SHIFT + " .. key,     hl.dsp.window.move({ workspace = i }))
+local function bind(keys, dispatcher, desc, opts)
+    opts = opts or {}
+    opts.description = desc
+    return hl.bind(keys, dispatcher, opts)
 end
 
--- Example special workspace (scratchpad)
-hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+-- Direction table drives focus, move and resize so the three stay in sync.
+-- Both hjkl and the arrow keys are bound; there is no cost to having both.
+local dirs = {
+    { key = "H", arrow = "left",  dir = "left",  dx = -1, dy =  0 },
+    { key = "J", arrow = "down",  dir = "down",  dx =  0, dy =  1 },
+    { key = "K", arrow = "up",    dir = "up",    dx =  0, dy = -1 },
+    { key = "L", arrow = "right", dir = "right", dx =  1, dy =  0 },
+}
 
--- Scroll through existing workspaces with mainMod + scroll
-hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+---- Launching ----
+bind(mod .. " + Return", hl.dsp.exec_cmd(terminal),    "Open terminal")
+bind(mod .. " + Space",  hl.dsp.exec_cmd(menu),        "Application launcher")
+bind(mod .. " + D",      hl.dsp.exec_cmd(menu),        "Application launcher (alias)")
+bind(mod .. " + E",      hl.dsp.exec_cmd(fileManager), "Open file manager")
 
--- Move/resize windows with mainMod + LMB/RMB and dragging
-hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
-hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+---- Window management ----
+bind(mod .. " + SHIFT + Q",     hl.dsp.window.close(),                            "Close window")
+bind(mod .. " + F",             hl.dsp.window.fullscreen(),                       "Fullscreen")
+bind(mod .. " + SHIFT + F",     hl.dsp.window.fullscreen({ mode = "maximized" }), "Maximize (keeps gaps)")
+bind(mod .. " + SHIFT + Space", hl.dsp.window.float({ action = "toggle" }),       "Toggle floating")
+bind(mod .. " + C",             hl.dsp.window.center(),                           "Center floating window")
+bind(mod .. " + V",             hl.dsp.layout("togglesplit"),                     "Toggle split direction")
+bind(mod .. " + P",             hl.dsp.window.pseudo(),                           "Toggle pseudo-tiling")
+
+---- Focus and movement ----
+for _, d in ipairs(dirs) do
+    for _, k in ipairs({ d.key, d.arrow }) do
+        bind(mod .. " + " .. k,         hl.dsp.focus({ direction = d.dir }),       "Focus " .. d.dir)
+        bind(mod .. " + SHIFT + " .. k, hl.dsp.window.move({ direction = d.dir }), "Move window " .. d.dir)
+    end
+end
+
+---- Resize mode (i3's Super+R submap; Escape or Enter leaves it) ----
+local RESIZE_STEP = 60
+
+hl.define_submap("resize", "escape", function()
+    for _, d in ipairs(dirs) do
+        for _, k in ipairs({ d.key, d.arrow }) do
+            hl.bind(k, hl.dsp.window.resize({ x = d.dx * RESIZE_STEP, y = d.dy * RESIZE_STEP }),
+                { repeating = true })
+        end
+    end
+    hl.bind("Return", hl.dsp.submap("reset"))
+end)
+
+bind(mod .. " + R", hl.dsp.submap("resize"), "Resize mode (hjkl/arrows, Esc or Enter to exit)")
+
+---- Workspaces ----
+for i = 1, 10 do
+    local key = i % 10 -- 10 maps to key 0
+    bind(mod .. " + " .. key,         hl.dsp.focus({ workspace = i }),       "Switch to workspace " .. i)
+    bind(mod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }), "Move window to workspace " .. i)
+end
+
+bind(mod .. " + TAB",         hl.dsp.focus({ workspace = "e+1" }), "Next workspace")
+bind(mod .. " + SHIFT + TAB", hl.dsp.focus({ workspace = "e-1" }), "Previous workspace")
+
+bind(mod .. " + S",         hl.dsp.workspace.toggle_special("magic"),            "Toggle scratchpad")
+bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }), "Move window to scratchpad")
+
+---- Session ----
+bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"), "Reload config")
+-- Guarded: quitting the session should not be one unconfirmed keypress away.
+bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("hypr-exit"),      "Exit Hyprland (asks first)")
+
+---- Mouse ----
+-- Scroll through existing workspaces with mod + scroll
+bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), "Next workspace")
+bind(mod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }), "Previous workspace")
+
+-- Move/resize windows with mod + LMB/RMB and dragging
+bind(mod .. " + mouse:272", hl.dsp.window.drag(),   "Drag window",   { mouse = true })
+bind(mod .. " + mouse:273", hl.dsp.window.resize(), "Resize window", { mouse = true })
 
 -- Laptop multimedia keys for volume and LCD brightness
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })

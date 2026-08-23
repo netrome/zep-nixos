@@ -79,9 +79,16 @@
     claude-code
     # Referenced by hyprland.lua keybindings:
     kdePackages.dolphin # Super+E
-    hyprlauncher # Super+R
     brightnessctl # XF86MonBrightness keys
     playerctl # XF86Audio media keys
+
+    # Super+Shift+E. Exiting used to be a single unconfirmed keypress (Super+M),
+    # which is an easy way to lose a session by accident.
+    (pkgs.writeShellScriptBin "hypr-exit" ''
+      choice=$(printf 'Cancel\nExit Hyprland\n' \
+        | ${pkgs.fuzzel}/bin/fuzzel --dmenu --prompt 'Exit Hyprland? ')
+      [ "$choice" = "Exit Hyprland" ] && exec ${pkgs.hyprland}/bin/hyprctl dispatch exit
+    '')
     # Wayland clipboard from the command line (wl-copy/wl-paste)
     wl-clipboard
   ];
@@ -112,7 +119,21 @@
       # its xdg portal; null stops home-manager from pulling in second copies.
       package = null;
       portalPackage = null;
+      # Explicit because the default is stateVersion-dependent, and the wrong
+      # value would feed Lua to the hyprlang parser.
+      configType = "lua";
       extraConfig = builtins.readFile ./hyprland.lua;
+    };
+
+    # Application launcher, on Super+Space and Super+D.
+    programs.fuzzel = lib.mkIf (name == "marten") {
+      enable = true;
+      settings.main = {
+        terminal = "${pkgs.alacritty}/bin/alacritty";
+        layer = "overlay";
+        lines = 12;
+        width = 45;
+      };
     };
 
     # Same helix setup as zep.
@@ -136,11 +157,19 @@
       };
     };
 
-    # Drop git's default -X so less uses the alternate screen, letting the
-    # terminal's alternate scroll mode translate the wheel into arrow keys.
     programs.git = {
       enable = true;
-      settings.core.pager = "less -RF";
+      settings = {
+        user.name = "Mårten Blankfors";
+        user.email = "marten@blankfors.se";
+
+        # Drop git's default -X so less uses the alternate screen, letting the
+        # terminal's alternate scroll mode translate the wheel into arrow keys.
+        core.pager = "less -RF";
+
+        init.defaultBranch = "main";
+        push.autoSetupRemote = true;
+      };
     };
 
     programs.tmux = {
