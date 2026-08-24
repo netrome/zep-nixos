@@ -8,7 +8,10 @@
   libGL,
   vulkan-loader,
   fontconfig,
-  xorg,
+  libx11,
+  libxcursor,
+  libxrandr,
+  libxi,
   wl-clipboard,
   src,
 }:
@@ -23,10 +26,10 @@ let
     libGL
     vulkan-loader # the lockfile pulls in ash/wgpu alongside glow
     fontconfig
-    xorg.libX11 # x11-dl is in the lockfile; harmless under Wayland but dlopened
-    xorg.libXcursor
-    xorg.libXrandr
-    xorg.libXi
+    libx11 # x11-dl is in the lockfile; harmless under Wayland but dlopened
+    libxcursor
+    libxrandr
+    libxi
   ];
 in
 
