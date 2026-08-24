@@ -244,6 +244,13 @@ hl.config({
     misc = {
         force_default_wallpaper = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers
         disable_hyprland_logo   = false, -- If true disables the random hyprland logo / anime girl background. :(
+
+        -- Escape hatch, not a convenience. If DPMS ever ends up off while the
+        -- session is otherwise alive, these make any keypress or mouse move
+        -- bring the panels back. Without them the only recovery is a blind
+        -- reboot, because a dark screen is indistinguishable from a hung one.
+        key_press_enables_dpms   = true,
+        mouse_move_enables_dpms  = true,
     },
 })
 

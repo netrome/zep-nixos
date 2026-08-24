@@ -271,7 +271,16 @@ in
           # Dispatchers go through hyprctl as *Lua*, not legacy names: this is a
           # Lua config, so `hyprctl dispatch dpms on` is a syntax error that
           # fails silently. hypridle's sample config assumes hyprlang.
-          after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms(\"on\")'";
+          #
+          # The argument MUST be a table. hlDpms() calls tableToggleAction(),
+          # which returns TOGGLE_ACTION_TOGGLE unless lua_istable() — so the
+          # obvious-looking `hl.dsp.dpms("on")` discards the string and
+          # *toggles*, while still printing `ok`. Two dispatches then cancel
+          # out, which is exactly what happens on a suspend resume: this
+          # after_sleep_cmd and the 660s listener's on-resume both fire, the
+          # displays toggle off→on→off, and the machine comes back with live
+          # input but dark panels. Cost two blind reboots on 2026-08-24.
+          after_sleep_cmd = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'";
 
           # Explicit rather than defaulted: honouring these is the entire reason
           # for picking hypridle. Flipping any to true reintroduces the Regolith
@@ -300,11 +309,11 @@ in
             timeout = 600;
             on-timeout = "${pkgs.systemd}/bin/loginctl lock-session";
           }
-          # 11 min: display off.
+          # 11 min: display off. Table args, not bare strings — see above.
           {
             timeout = 660;
-            on-timeout = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms(\"off\")'";
-            on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms(\"on\")'";
+            on-timeout = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'";
+            on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'";
           }
           # 30 min: suspend. before_sleep_cmd locks first.
           {
