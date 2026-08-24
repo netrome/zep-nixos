@@ -493,6 +493,91 @@ in
       };
     };
 
+    # PDF viewer. The nixpkgs `zathura` attr is the wrapper and already bundles
+    # the mupdf PDF plugin (plus djvu/ps/cb), so nothing else is needed to open
+    # a document. Keys are vim's: j/k scroll, gg/G jump, / searches, Tab opens
+    # the thumbnail index, `:` takes any of the options below at runtime.
+    programs.zathura = lib.mkIf (name == "marten") {
+      enable = true;
+      options = {
+        # zathura draws its own chrome with girara instead of following the GTK
+        # theme, so the dark setup above doesn't reach it. These are mako's
+        # colours, so notifications and the viewer match.
+        default-bg = "#1a1a1a";
+        default-fg = "#e6e6e6";
+        statusbar-bg = "#1a1a1a";
+        statusbar-fg = "#e6e6e6";
+        inputbar-bg = "#1a1a1a";
+        inputbar-fg = "#e6e6e6";
+        # Search hits, and the one currently jumped to. These two have to carry
+        # their own alpha — the old highlight-transparency option is gone, and
+        # an opaque colour here paints over the very text it is marking.
+        highlight-color = "rgba(51,204,255,0.5)";
+        highlight-active-color = "rgba(0,255,153,0.5)";
+        font = "JetBrainsMono Nerd Font 11";
+
+        # Page contents stay as authored — Ctrl+R toggles inversion for the
+        # white-page-at-night case, and these are the two ends it maps to.
+        # keephue keeps figures and syntax highlighting recognisable inverted.
+        recolor = false;
+        recolor-lightcolor = "#1a1a1a";
+        recolor-darkcolor = "#e6e6e6";
+        recolor-keephue = true;
+
+        # The default plain-text database only carries bookmarks; sqlite is what
+        # makes a document reopen on the page it was left at.
+        database = "sqlite";
+
+        # Without this, yanked text goes to the primary selection only, so
+        # Ctrl+V in another app comes up empty.
+        selection-clipboard = "clipboard";
+      };
+    };
+
+    # Nothing claimed PDFs before, so Firefox downloads and Dolphin double-clicks
+    # had no handler to hand them to. This is the whole reason the viewer is
+    # reachable outside of typing `zathura` in a terminal.
+    #
+    # force is needed because ~/.config/mimeapps.list already existed: Telegram
+    # and Slack register their scheme handlers by writing it at runtime, and
+    # `claude` installs its own URL handler the same way. Home-manager refuses to
+    # clobber a file it didn't create, so activation fails until we say so
+    # explicitly. The catch is that force makes it a read-only store symlink —
+    # those apps can no longer add themselves back, so anything they used to
+    # write has to be declared here or it is simply gone. Hence the second group
+    # below: it is not new configuration, it is what that file already held.
+    xdg.mimeApps = lib.mkIf (name == "marten") {
+      enable = true;
+      defaultApplications = {
+        "application/pdf" = "org.pwmt.zathura.desktop";
+        "image/vnd.djvu" = "org.pwmt.zathura.desktop";
+        "application/postscript" = "org.pwmt.zathura.desktop";
+
+        # Pre-existing, preserved verbatim — these are what make slack:// links
+        # from the browser, tg:// links, and `claude --resume` deep links open
+        # the installed app instead of nothing at all.
+        "x-scheme-handler/slack" = "slack.desktop";
+        "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/claude-cli" = "claude-code-url-handler.desktop";
+      };
+
+      # Telegram had these in [Added Associations] as well as as defaults.
+      associations.added = {
+        "x-scheme-handler/tg" = "org.telegram.desktop.desktop";
+        "x-scheme-handler/tonsite" = "org.telegram.desktop.desktop";
+      };
+    };
+
+    # See the force note on xdg.mimeApps above. Applies to the file HM would
+    # otherwise refuse to overwrite; kept narrow rather than set globally via
+    # home-manager.backupFileExtension so a future collision still stops and
+    # asks instead of silently taking over a file someone edited by hand.
+    # mkIf, not a bare `.force` — home-manager.users covers dev too, and an entry
+    # with force but no source would fail to evaluate for a user that has no
+    # mimeapps.list to begin with.
+    xdg.configFile."mimeapps.list" = lib.mkIf (name == "marten") { force = true; };
+
     # Same helix setup as zep.
     programs.helix = {
       enable = true;
