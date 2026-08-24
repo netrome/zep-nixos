@@ -363,8 +363,10 @@ end
 bind(mod .. " + TAB",         hl.dsp.focus({ workspace = "e+1" }), "Next workspace")
 bind(mod .. " + SHIFT + TAB", hl.dsp.focus({ workspace = "e-1" }), "Previous workspace")
 
-bind(mod .. " + S",         hl.dsp.workspace.toggle_special("magic"),            "Toggle scratchpad")
-bind(mod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }), "Move window to scratchpad")
+-- Scratchpad on minus, which is i3's actual convention ($mod+minus /
+-- $mod+Shift+minus). It was on S, but that is where slackmd lives.
+bind(mod .. " + minus",         hl.dsp.workspace.toggle_special("magic"),            "Toggle scratchpad")
+bind(mod .. " + SHIFT + minus", hl.dsp.window.move({ workspace = "special:magic" }), "Move window to scratchpad")
 
 ---- Session ----
 -- Via loginctl rather than hyprlock directly: hypridle catches the logind Lock
@@ -375,6 +377,13 @@ bind(mod .. " + SHIFT + C", hl.dsp.exec_cmd("hyprctl reload"), "Reload config")
 -- The physical power key lands here too; logind ignores its short press.
 bind(mod .. " + SHIFT + E", hl.dsp.exec_cmd("power-menu"), "Power menu")
 bind("XF86PowerOff",        hl.dsp.exec_cmd("power-menu"), "Power menu")
+
+---- Own tools ----
+-- slackmd converts the clipboard in place, so these are fire-and-forget: copy
+-- in Slack, hit Super+M, paste as Markdown (and the reverse with Super+S).
+bind(mod .. " + M",         hl.dsp.exec_cmd("slackmd to-md"),    "Clipboard: Slack to Markdown")
+bind(mod .. " + S",         hl.dsp.exec_cmd("slackmd to-slack"), "Clipboard: Markdown to Slack")
+bind(mod .. " + SHIFT + M", hl.dsp.exec_cmd("mojime"),           "Emoji picker")
 
 ---- Notifications ----
 bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("makoctl mode -t do-not-disturb"), "Toggle do-not-disturb")
@@ -461,4 +470,21 @@ hl.window_rule({
 
     move  = "20 monitor_h-120",
     float = true,
+})
+
+-- Mojime is a transient picker, not a tiled window. Two rules because the
+-- Wayland app_id and the window title are set independently — the title is
+-- "Mojime" (set via ViewportBuilder), the app_id comes from the binary name.
+hl.window_rule({
+    name   = "float-mojime-class",
+    match  = { class = "^(mojime|Mojime)$" },
+    float  = true,
+    center = true,
+})
+
+hl.window_rule({
+    name   = "float-mojime-title",
+    match  = { title = "^Mojime$" },
+    float  = true,
+    center = true,
 })

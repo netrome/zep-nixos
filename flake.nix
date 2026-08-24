@@ -13,9 +13,17 @@
     zink.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager/release-26.05";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+
+    # Own tools, packaged in ./pkgs. flake = false because neither repo has a
+    # flake.nix — this pins the revision in flake.lock so `nix flake update`
+    # bumps them like any other input, rather than hardcoding a sha256.
+    slackmd.url = "github:netrome/slackmd";
+    slackmd.flake = false;
+    mojime.url = "github:netrome/mojime";
+    mojime.flake = false;
   };
 
-  outputs = { self, nixpkgs, disko, mindex, agenix, home-manager, zink }: {
+  outputs = { self, nixpkgs, disko, mindex, agenix, home-manager, zink, slackmd, mojime }: {
     nixosConfigurations.zep = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       specialArgs = { inherit mindex zink; };
@@ -33,6 +41,7 @@
 
     nixosConfigurations.edo = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
+      specialArgs = { slackmdSrc = slackmd; mojimeSrc = mojime; };
       modules = [
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager

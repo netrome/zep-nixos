@@ -1,4 +1,10 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, slackmdSrc, mojimeSrc, ... }:
+let
+  # Sources come from flake inputs (flake = false), so revisions are pinned in
+  # flake.lock and bumped with `nix flake update slackmd mojime`.
+  slackmd = pkgs.callPackage ../../pkgs/slackmd.nix { src = slackmdSrc; };
+  mojime = pkgs.callPackage ../../pkgs/mojime.nix { src = mojimeSrc; };
+in
 {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -105,6 +111,10 @@
     zulip
 
     libnotify # notify-send, for testing that mako is alive
+
+    # Own tools, see ../../pkgs and the keybindings in hyprland.lua.
+    slackmd # Super+M / Super+S
+    mojime # Super+Shift+M
 
     # Scripts live in ./scripts/ rather than inline. writeShellApplication puts
     # runtimeInputs on PATH, so those files are plain shell with no Nix

@@ -127,6 +127,22 @@
         "type": "github"
       }
     },
+    "mojime": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1771788637,
+        "narHash": "sha256-dF+cBgAjNcflHnyVdNj7mZr//oXUviPcs7rXg5gkZyk=",
+        "owner": "netrome",
+        "repo": "mojime",
+        "rev": "deb6523056f1edb4b5adaca0ad5a55b779a28e57",
+        "type": "github"
+      },
+      "original": {
+        "owner": "netrome",
+        "repo": "mojime",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1787101114,
@@ -149,7 +165,9 @@
         "disko": "disko",
         "home-manager": "home-manager_2",
         "mindex": "mindex",
+        "mojime": "mojime",
         "nixpkgs": "nixpkgs",
+        "slackmd": "slackmd",
         "zink": "zink"
       }
     },
@@ -171,6 +189,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "slackmd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769547026,
+        "narHash": "sha256-q9v7LYkAF/lunFJ9h0OqF+gluVFwr7VzAhrc7wedITE=",
+        "owner": "netrome",
+        "repo": "slackmd",
+        "rev": "6c830e2b79419378964deeb4d3886f3739f66134",
+        "type": "github"
+      },
+      "original": {
+        "owner": "netrome",
+        "repo": "slackmd",
         "type": "github"
       }
     },
