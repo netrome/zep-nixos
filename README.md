@@ -77,6 +77,31 @@ encoded from the 2026-07-28 incident: no Caddy admin API (and if Caddy ever
 returns, `admin off`), no root-run services, no `0.0.0.0` dev servers — bind
 loopback and use `ssh -L` instead.
 
+## Secrets
+
+agenix; recipients listed in `secrets/secrets.nix` (the `marten@edo` key and
+zep's host key). Decrypted at boot into `/run/agenix`, never on disk.
+
+To add or rotate one, from a clone on the laptop:
+
+```sh
+cd secrets   # agenix reads ./secrets.nix, and rule keys are bare filenames
+nix run github:ryantm/agenix -- -e <name>.age
+```
+
+`git-credentials.nix` gives each user in its `patUsers` list a GitHub PAT via a
+credential helper scoped to `https://github.com`. The secret is the literal
+two-line answer to git's credential protocol:
+
+```
+username=<github login>
+password=<the PAT>
+```
+
+Not `git config credential.helper store` — home-manager owns
+`~/.config/git/config` as a read-only store symlink, and the `store` helper
+rewrites its file after every successful auth, which fails against `/run/agenix`.
+
 ## Running Claude with --dangerously-skip-permissions
 
 The isolation model, in decreasing order of importance:
