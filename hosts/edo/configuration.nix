@@ -87,6 +87,28 @@ in
   };
   security.rtkit.enable = true;
 
+  # Secret Service provider (org.freedesktop.secrets). near-cli-rs stores access
+  # keys through this D-Bus API and has no file-based fallback for it — its only
+  # other mode is the "legacy keychain", which is plaintext JSON under
+  # ~/.near-credentials. Nothing here supplied a provider before: on TuxedoOS
+  # gnome-keyring came along with GNOME, and Hyprland has no equivalent, so the
+  # keychain option failed with an error pointing at a Python library's README.
+  #
+  # The module registers the D-Bus service and sets
+  # security.pam.services.login.enableGnomeKeyring. That is the right hook here
+  # because logins happen on tty1 through agetty, i.e. the `login` PAM service;
+  # the keyring is then unlocked with the login password as a side effect of
+  # signing in, with no separate prompt.
+  services.gnome.gnome-keyring.enable = true;
+
+  # The module only wires the `login` service, and /etc/pam.d/passwd ships with
+  # pam_unix alone. Without this, `passwd` would change the Unix password while
+  # login.keyring stayed encrypted with the old one — auto-unlock then breaks,
+  # and it surfaces much later as an unexplained password prompt rather than as
+  # an error at the point of the change. pam_gnome_keyring's password phase
+  # re-encrypts the keyring in step.
+  security.pam.services.passwd.enableGnomeKeyring = true;
+
   environment.systemPackages = with pkgs; [
     alacritty
     git
@@ -102,6 +124,10 @@ in
     tokei
     claude-code
     near-cli-rs # provides `near`; see ../../pkgs/near-cli-rs.nix
+
+    # Keychain tooling, both talking to the gnome-keyring service above.
+    libsecret # secret-tool: inspect/store entries from the shell
+    seahorse # GUI; the only convenient way to re-password a keyring file
     # Referenced by hyprland.lua keybindings:
     kdePackages.dolphin # Super+E
     brightnessctl # XF86MonBrightness keys
