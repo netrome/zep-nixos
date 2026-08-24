@@ -143,6 +143,23 @@
         "type": "github"
       }
     },
+    "near-cli-rs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787008708,
+        "narHash": "sha256-X9pTR/rhnY4H8PqPjqOmhKxZldVwJI2+rIoRhwjRQSM=",
+        "owner": "near",
+        "repo": "near-cli-rs",
+        "rev": "c36302c0f97dc49175ed2bb0679c0bc6f00c3f63",
+        "type": "github"
+      },
+      "original": {
+        "owner": "near",
+        "ref": "v0.30.0",
+        "repo": "near-cli-rs",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1787101114,
@@ -166,6 +183,7 @@
         "home-manager": "home-manager_2",
         "mindex": "mindex",
         "mojime": "mojime",
+        "near-cli-rs": "near-cli-rs",
         "nixpkgs": "nixpkgs",
         "slackmd": "slackmd",
         "zink": "zink"

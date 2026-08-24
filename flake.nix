@@ -21,12 +21,19 @@
     slackmd.flake = false;
     mojime.url = "github:netrome/mojime";
     mojime.flake = false;
+
+    # Not in nixpkgs: the JS `near-cli` was dropped in 2025 when upstream
+    # archived it, and the Rust rewrite that replaced it was never packaged.
+    # Same flake = false treatment as the tools above; pinned to a release tag
+    # rather than a branch since this one isn't ours. Packaged in ./pkgs.
+    near-cli-rs.url = "github:near/near-cli-rs/v0.30.0";
+    near-cli-rs.flake = false;
   };
 
-  outputs = { self, nixpkgs, disko, mindex, agenix, home-manager, zink, slackmd, mojime }: {
+  outputs = { self, nixpkgs, disko, mindex, agenix, home-manager, zink, slackmd, mojime, near-cli-rs }: {
     nixosConfigurations.zep = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit mindex zink; };
+      specialArgs = { inherit mindex zink; nearCliSrc = near-cli-rs; };
       modules = [
         disko.nixosModules.disko
         agenix.nixosModules.default
@@ -41,7 +48,7 @@
 
     nixosConfigurations.edo = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { slackmdSrc = slackmd; mojimeSrc = mojime; };
+      specialArgs = { slackmdSrc = slackmd; mojimeSrc = mojime; nearCliSrc = near-cli-rs; };
       modules = [
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager

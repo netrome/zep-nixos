@@ -1,9 +1,13 @@
-{ pkgs, lib, slackmdSrc, mojimeSrc, ... }:
+{ pkgs, lib, slackmdSrc, mojimeSrc, nearCliSrc, ... }:
 let
   # Sources come from flake inputs (flake = false), so revisions are pinned in
-  # flake.lock and bumped with `nix flake update slackmd mojime`.
+  # flake.lock and bumped with `nix flake update slackmd mojime near-cli-rs`.
   slackmd = pkgs.callPackage ../../pkgs/slackmd.nix { src = slackmdSrc; };
   mojime = pkgs.callPackage ../../pkgs/mojime.nix { src = mojimeSrc; };
+  # Named for its pname, not `near-cli`: nixpkgs still carries a `near-cli`
+  # attribute that throws on eval, and a let binding that shadows it would make
+  # any typo here fail in a confusing place.
+  near-cli-rs = pkgs.callPackage ../../pkgs/near-cli-rs.nix { src = nearCliSrc; };
 in
 {
   boot.loader.systemd-boot.enable = true;
@@ -97,6 +101,7 @@ in
     fastfetch
     tokei
     claude-code
+    near-cli-rs # provides `near`; see ../../pkgs/near-cli-rs.nix
     # Referenced by hyprland.lua keybindings:
     kdePackages.dolphin # Super+E
     brightnessctl # XF86MonBrightness keys

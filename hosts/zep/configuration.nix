@@ -1,6 +1,13 @@
-{ pkgs, lib, mindex, ... }:
+{ pkgs, lib, mindex, nearCliSrc, ... }:
 
 let
+  # Source comes from a flake input (flake = false), so the revision is pinned in
+  # flake.lock and bumped with `nix flake update near-cli-rs`. Named for its
+  # pname, not `near-cli`: nixpkgs still carries a `near-cli` attribute that
+  # throws on eval, and a let binding that shadows it would make any typo here
+  # fail in a confusing place.
+  near-cli-rs = pkgs.callPackage ../../pkgs/near-cli-rs.nix { src = nearCliSrc; };
+
   # Private key lives on the laptop (edo) and was never on this server.
   sshKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAl4uMk/HNkQauwnCoX4nBWmEp0Qka4rQ7YNxBET/9w8 marten@edo";
 
@@ -117,6 +124,7 @@ in
     tree
     fastfetch
     tokei
+    near-cli-rs # provides `near`; see ../../pkgs/near-cli-rs.nix
     mindex.packages.${pkgs.stdenv.hostPlatform.system}.default
     pythonEnv
     # nixpkgs only ships a `python3` binary; keep a `python` alias for
