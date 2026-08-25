@@ -351,7 +351,9 @@ local RESIZE_STEP = 60
 hl.define_submap("resize", "escape", function()
     for _, d in ipairs(dirs) do
         for _, k in ipairs({ d.key, d.arrow }) do
-            hl.bind(k, hl.dsp.window.resize({ x = d.dx * RESIZE_STEP, y = d.dy * RESIZE_STEP }),
+            -- relative defaults to *false*, unlike legacy `resizeactive`: without
+            -- it a step is read as an exact target size and rejected as invalid.
+            hl.bind(k, hl.dsp.window.resize({ x = d.dx * RESIZE_STEP, y = d.dy * RESIZE_STEP, relative = true }),
                 { repeating = true })
         end
     end
