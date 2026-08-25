@@ -148,7 +148,7 @@ in
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users = lib.genAttrs [ "marten" "dev" "dev-near" ] (name: {
+  home-manager.users = lib.genAttrs [ "marten" "dev" "dev-near" ] (name: { config, ... }: {
     home.stateVersion = "26.05";
 
     programs.helix = {
@@ -176,6 +176,16 @@ in
     programs.git = {
       enable = true;
       settings.core.pager = "less -RF";
+
+      # SSH signatures, as on edo. Unlike edo these keys are signing-only —
+      # nothing on this box authenticates over SSH outbound (pushes go over
+      # HTTPS with a PAT, see git-credentials.nix), so the key exists purely to
+      # sign. Each user needs one generated once; see the README.
+      signing = {
+        format = "ssh";
+        key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+        signByDefault = true;
+      };
     };
 
     programs.tmux = {

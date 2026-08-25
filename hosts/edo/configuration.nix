@@ -200,7 +200,7 @@ in
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = true;
-  home-manager.users = lib.genAttrs [ "marten" "dev" ] (name: {
+  home-manager.users = lib.genAttrs [ "marten" "dev" ] (name: { config, ... }: {
     home.stateVersion = "26.05";
 
     # marten-only: dev doesn't run a graphical session. The config itself
@@ -620,6 +620,20 @@ in
 
         init.defaultBranch = "main";
         push.autoSetupRemote = true;
+      };
+
+      # SSH signatures rather than GPG: no gpg-agent, keyring or smartcard
+      # daemon, and a hardware key needs nothing extra later — a YubiKey FIDO2
+      # credential is also just a `user.signingkey` path, so switching to one
+      # means changing this line (see README for the non-rebuild routes).
+      #
+      # Reuses the authentication key; GitHub takes the same key registered
+      # twice, once as an auth key and once as a signing key. That key has a
+      # passphrase, so every commit prompts for it.
+      signing = lib.mkIf (name == "marten") {
+        format = "ssh";
+        key = "${config.home.homeDirectory}/.ssh/id_ed25519.pub";
+        signByDefault = true;
       };
     };
 

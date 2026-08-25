@@ -102,6 +102,66 @@ Not `git config credential.helper store` — home-manager owns
 `~/.config/git/config` as a read-only store symlink, and the `store` helper
 rewrites its file after every successful auth, which fails against `/run/agenix`.
 
+## Commit signing
+
+Signatures are made with SSH keys (`gpg.format = ssh`), set up in each host's
+`programs.git.signing` block. No GPG: no gpg-agent, no keyring, no smartcard
+daemon, and one mechanism that also covers a hardware key later.
+
+On edo this reuses `marten`'s existing `~/.ssh/id_ed25519`, which has a
+passphrase — so each commit prompts for it. That prompt needs a tty, so agent
+sessions running as `marten` can't commit unless a key is loaded in the
+`gcr-ssh-agent` already running under the graphical session (nothing exports
+`SSH_AUTH_SOCK` to it yet).
+
+zep's users have no SSH key of their own — pushes go over HTTPS with a PAT, see
+above — so signing needs one generated per user, once. `dev` and `dev-near`
+commit unattended, so theirs must have no passphrase:
+
+```sh
+for u in marten dev dev-near; do
+  sudo -u "$u" ssh-keygen -q -t ed25519 -N "" -C "git signing $u@zep" \
+    -f "/home/$u/.ssh/id_ed25519"
+done
+```
+
+Each key then has to be registered on GitHub *as a signing key* — Settings →
+SSH and GPG keys → New SSH key → key type **Signing key**. That is separate
+from an authentication key; the same public key can be registered as both.
+
+Verifying signatures locally (`git log --show-signature`, `git verify-commit`)
+additionally needs `gpg.ssh.allowedSignersFile` pointing at a file of trusted
+public keys. Not configured — without it git reports every signature as coming
+from an unknown key, which affects nothing about making them.
+
+### Signing with a YubiKey instead
+
+Nothing gets imported onto the key: `ssh-keygen` generates a FIDO2 credential
+on the YubiKey itself, and the file it writes is a *handle* that is useless
+without the physical key plus a touch.
+
+```sh
+ssh-keygen -t ed25519-sk -C "git signing yubikey" -f ~/.ssh/id_ed25519_sk
+```
+
+Needs a YubiKey 5 on firmware 5.2.3 or newer; `-t ecdsa-sk` otherwise. No
+system config for it — udev handles FIDO natively (`hardware.u2f` was removed
+from nixpkgs for exactly that reason), and systemd's `60-fido-id.rules` and
+`70-uaccess.rules` already give the logged-in seat access to a plugged-in key.
+
+Switching between the two keys is one `user.signingkey` path, but *not* via
+`git config --global`, for the read-only-symlink reason above. Either flip
+`signing.key` in `hosts/edo/configuration.nix` and rebuild, or set it per repo:
+
+```sh
+git config --local user.signingkey ~/.ssh/id_ed25519_sk.pub
+```
+
+For a toggle that doesn't need a rebuild, add `programs.git.includes = [{ path
+= "${config.xdg.configHome}/git/signing.conf"; }]` and write that file by hand —
+a later include wins, and git ignores a missing one, so the declarative default
+applies whenever the file is absent.
+
 ## Running Claude with --dangerously-skip-permissions
 
 The isolation model, in decreasing order of importance:
