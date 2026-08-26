@@ -123,6 +123,7 @@ in
     fastfetch
     tokei
     claude-code
+    codex
     near-cli-rs # provides `near`; see ../../pkgs/near-cli-rs.nix
 
     # Keychain tooling, both talking to the gnome-keyring service above.
