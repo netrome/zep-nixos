@@ -315,11 +315,18 @@ end
 
 -- Direction table drives focus, move and resize so the three stay in sync.
 -- Both hjkl and the arrow keys are bound; there is no cost to having both.
+--
+-- `mon` is the monitor selector for the same direction. It is deliberately a
+-- single letter: a monitor selector only accepts l/r/u/d/t/b as a direction
+-- (isDirection() in helpers/MiscFunctions.cpp), and anything longer falls
+-- through to being matched as a monitor *name* — which silently does nothing
+-- at dispatch time, since `hyprctl eval` only builds the closure and cannot
+-- catch it.
 local dirs = {
-    { key = "H", arrow = "left",  dir = "left",  dx = -1, dy =  0 },
-    { key = "J", arrow = "down",  dir = "down",  dx =  0, dy =  1 },
-    { key = "K", arrow = "up",    dir = "up",    dx =  0, dy = -1 },
-    { key = "L", arrow = "right", dir = "right", dx =  1, dy =  0 },
+    { key = "H", arrow = "left",  dir = "left",  mon = "l", dx = -1, dy =  0 },
+    { key = "J", arrow = "down",  dir = "down",  mon = "d", dx =  0, dy =  1 },
+    { key = "K", arrow = "up",    dir = "up",    mon = "u", dx =  0, dy = -1 },
+    { key = "L", arrow = "right", dir = "right", mon = "r", dx =  1, dy =  0 },
 }
 
 ---- Launching ----
@@ -338,10 +345,15 @@ bind(mod .. " + V",             hl.dsp.layout("togglesplit"),                   
 bind(mod .. " + P",             hl.dsp.window.pseudo(),                           "Toggle pseudo-tiling")
 
 ---- Focus and movement ----
+-- Plain focus already crosses monitors at the edge of the layout, so there is
+-- no separate "focus monitor" bind. Ctrl+Shift is i3's convention for taking
+-- the whole workspace to the next output (`move workspace to output <dir>`),
+-- and focus follows it there.
 for _, d in ipairs(dirs) do
     for _, k in ipairs({ d.key, d.arrow }) do
-        bind(mod .. " + " .. k,         hl.dsp.focus({ direction = d.dir }),       "Focus " .. d.dir)
-        bind(mod .. " + SHIFT + " .. k, hl.dsp.window.move({ direction = d.dir }), "Move window " .. d.dir)
+        bind(mod .. " + " .. k,                hl.dsp.focus({ direction = d.dir }),       "Focus " .. d.dir)
+        bind(mod .. " + SHIFT + " .. k,        hl.dsp.window.move({ direction = d.dir }), "Move window " .. d.dir)
+        bind(mod .. " + CTRL + SHIFT + " .. k, hl.dsp.workspace.move({ monitor = d.mon }), "Move workspace to monitor " .. d.dir)
     end
 end
 
