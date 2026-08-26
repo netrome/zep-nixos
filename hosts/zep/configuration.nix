@@ -121,6 +121,7 @@ in
     htop
     rsync
     claude-code
+    codex
     tree
     fastfetch
     tokei
