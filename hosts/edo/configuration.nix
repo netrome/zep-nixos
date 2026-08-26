@@ -623,9 +623,10 @@ in
         user.name = "Mårten Blankfors";
         user.email = "marten@blankfors.se";
 
-        # Drop git's default -X so less uses the alternate screen, letting the
-        # terminal's alternate scroll mode translate the wheel into arrow keys.
-        core.pager = "less -RF";
+        # Git injects LESS=FRX when LESS is otherwise unset. Explicitly cancel X
+        # so less uses the alternate screen, letting the terminal translate
+        # mouse-wheel events into pager navigation.
+        core.pager = "less -RF -+X";
 
         init.defaultBranch = "main";
         push.autoSetupRemote = true;

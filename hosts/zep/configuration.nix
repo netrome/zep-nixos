@@ -172,11 +172,12 @@ in
       };
     };
 
-    # Drop git's default -X so less uses the alternate screen, letting the
-    # terminal's alternate scroll mode translate the wheel into arrow keys.
+    # Git injects LESS=FRX when LESS is otherwise unset. Explicitly cancel X so
+    # less uses the alternate screen, letting the terminal translate mouse-wheel
+    # events into pager navigation.
     programs.git = {
       enable = true;
-      settings.core.pager = "less -RF";
+      settings.core.pager = "less -RF -+X";
 
       # SSH signatures, as on edo. Unlike edo these keys are signing-only —
       # nothing on this box authenticates over SSH outbound (pushes go over
