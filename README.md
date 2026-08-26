@@ -1,8 +1,9 @@
 # zep — NixOS config
 
-Minimal dev server: SSH in, review PRs, develop. No public services beyond SSH.
-Everything the machine *is* lives in this repo; reprovisioning is ~30 minutes
-with nixos-anywhere, so nothing on the box is treated as durable.
+Minimal dev server: SSH in, review PRs, and develop. It also hosts the Mindex
+instance at `m.blankfors.se` and a Zink relay. Everything the machine *is* lives
+in this repo; reprovisioning is ~30 minutes with nixos-anywhere, so nothing on
+the system disk is treated as durable. Zink's runtime state lives on `/data`.
 
 ## Layout
 
@@ -12,6 +13,9 @@ with nixos-anywhere, so nothing on the box is treated as durable.
 | `disko.nix` | Disk 134B: ESP + ext4 root. Disk 12EC: ext4 on `/data`. No RAID. |
 | `hardware.nix` | Kernel modules, AMD microcode |
 | `configuration.nix` | Network, SSH, users, packages |
+| `mindex.nix` | Mindex service and its Caddy reverse proxy |
+| `zink.nix` | Zink relay and persistent state under `/data` |
+| `git-credentials.nix` | Per-user GitHub credentials from agenix secrets |
 
 Users: `marten` (wheel, passwordless sudo) and `dev` (no sudo — sandbox for
 agent sessions). Both log in with the `marten@edo` key only.
@@ -71,11 +75,12 @@ Edit, commit, then from the laptop (or any clone):
 nixos-rebuild switch --flake .#zep --target-host zep --use-remote-sudo
 ```
 
-Adding a public service later = declare it in `configuration.nix` **and** open
-its port in `networking.firewall`. Nothing is reachable by default. Lessons
-encoded from the 2026-07-28 incident: no Caddy admin API (and if Caddy ever
-returns, `admin off`), no root-run services, no `0.0.0.0` dev servers — bind
-loopback and use `ssh -L` instead.
+Public services must be declared in a host module and have only their required
+ports opened in `networking.firewall`. Currently Caddy exposes Mindex on ports
+80/443, while the Zink relay uses UDP 4400/4401 and TCP 4401. Lessons encoded
+from the 2026-07-28 incident: Caddy's admin API stays disabled (`admin off`),
+services do not run as root, and ad-hoc dev servers must not bind `0.0.0.0` —
+bind loopback and use `ssh -L` instead.
 
 ## Secrets
 
@@ -172,7 +177,8 @@ The isolation model, in decreasing order of importance:
 2. **Run agent sessions as `dev`**, not `marten`: no sudo, no read access to
    `marten`'s home (0700). Give `dev` its own fine-grained GitHub PAT scoped to
    the repos it works on, not your main token.
-3. The firewall blocks all inbound except SSH.
+3. The firewall admits only the explicitly declared SSH, Mindex/Caddy, and Zink
+   relay ports; arbitrary development ports remain unreachable.
 
 If stronger isolation is wanted later: per-project `nixos-container` or
 microvm.nix guests are both declarative one-file additions.
