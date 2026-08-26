@@ -5,4 +5,5 @@ in
 {
   "mindex-env.age".publicKeys = [ marten zep ];
   "github-pat-dev-near.age".publicKeys = [ marten zep ];
+  "near-ai-api-key.age".publicKeys = [ marten zep ];
 }

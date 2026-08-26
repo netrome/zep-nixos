@@ -42,6 +42,7 @@
         ./hosts/zep/hardware.nix
         ./hosts/zep/configuration.nix
         ./hosts/zep/git-credentials.nix
+        ./hosts/zep/opencode-near.nix
         ./hosts/zep/mindex.nix
         ./hosts/zep/zink.nix
       ];

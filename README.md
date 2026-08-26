@@ -16,6 +16,7 @@ the system disk is treated as durable. Zink's runtime state lives on `/data`.
 | `mindex.nix` | Mindex service and its Caddy reverse proxy |
 | `zink.nix` | Zink relay and persistent state under `/data` |
 | `git-credentials.nix` | Per-user GitHub credentials from agenix secrets |
+| `opencode-near.nix` | OpenCode configured for NEAR AI Cloud (`dev-near` only) |
 
 Users: `marten` (wheel, passwordless sudo) and `dev` (no sudo — sandbox for
 agent sessions). Both log in with the `marten@edo` key only.
@@ -93,6 +94,19 @@ To add or rotate one, from a clone on the laptop:
 cd secrets   # agenix reads ./secrets.nix, and rule keys are bare filenames
 nix run github:ryantm/agenix -- -e <name>.age
 ```
+
+For OpenCode, create `near-ai-api-key.age` with only the raw NEAR AI Cloud API
+key (no variable name or quotes), then rebuild zep. It is decrypted read-only
+for `dev-near`; OpenCode reads it directly from `/run/agenix` without placing
+the plaintext in the Nix store or exporting it into the shell environment.
+
+```sh
+cd secrets
+nix run github:ryantm/agenix -- -e near-ai-api-key.age
+```
+
+After deploying, log in as `dev-near` and run `opencode`. The declarative
+configuration selects NEAR AI Cloud's `z-ai/glm-5.2` model by default.
 
 `git-credentials.nix` gives each user in its `patUsers` list a GitHub PAT via a
 credential helper scoped to `https://github.com`. The secret is the literal
