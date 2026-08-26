@@ -168,7 +168,15 @@ in
 
   # Nothing on the system had icon glyphs, so starship's git-branch symbol and
   # anything in the bar rendered as tofu. This covers both.
-  fonts.packages = [ pkgs.nerd-fonts.jetbrains-mono ];
+  #
+  # Noto Sans Symbols 2 is the only font here carrying the non-emoji Dingbats
+  # and Symbols blocks — e.g. U+1F5F8 LIGHT CHECK MARK, which some web UIs use
+  # as a status tick and which Noto Color Emoji does not cover. Trimmed to the
+  # one variant so this stays 400K rather than all 50M of Noto.
+  fonts.packages = [
+    pkgs.nerd-fonts.jetbrains-mono
+    (pkgs.noto-fonts.override { variants = [ "Noto Sans Symbols 2" ]; })
+  ];
 
   # Required for the dconf database that carries the dark-mode setting. Without
   # it home-manager writes the keys but nothing reads them back.
