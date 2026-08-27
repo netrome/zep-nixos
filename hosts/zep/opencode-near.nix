@@ -31,6 +31,9 @@ in
         models."z-ai/glm-5.2" = {
           name = "GLM 5.2";
         };
+        models."deepseek-ai/DeepSeek-V4-Flash" = {
+          name = "DeepSeek V4 Flash";
+        };
       };
     };
 }
