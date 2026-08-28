@@ -569,6 +569,11 @@ in
     xdg.mimeApps = lib.mkIf (name == "marten") {
       enable = true;
       defaultApplications = {
+        "text/html" = "firefox.desktop";
+        "application/xhtml+xml" = "firefox.desktop";
+        "x-scheme-handler/http" = "firefox.desktop";
+        "x-scheme-handler/https" = "firefox.desktop";
+
         "application/pdf" = "org.pwmt.zathura.desktop";
         "image/vnd.djvu" = "org.pwmt.zathura.desktop";
         "application/postscript" = "org.pwmt.zathura.desktop";
