@@ -142,6 +142,8 @@ in
     telegram-desktop
     zulip
 
+    google-chrome # unfree — required for Google Workspace Endpoint Verification
+
     libnotify # notify-send, for testing that mako is alive
 
     # Own tools, see ../../pkgs and the keybindings in hyprland.lua.
@@ -654,7 +656,7 @@ in
   });
 
   nixpkgs.config.allowUnfreePredicate =
-    pkg: builtins.elem (lib.getName pkg) [ "claude-code" "slack" ];
+    pkg: builtins.elem (lib.getName pkg) [ "claude-code" "google-chrome" "slack" ];
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
