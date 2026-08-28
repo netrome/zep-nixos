@@ -152,6 +152,45 @@ in
   home-manager.users = lib.genAttrs [ "marten" "dev" "dev-near" ] (name: { config, ... }: {
     home.stateVersion = "26.05";
 
+    # Keep near-cli's network configuration declarative. The public FASTNEAR
+    # RPC endpoints are rate limited, so use dRPC for JSON-RPC requests while
+    # retaining FASTNEAR's separate API endpoints.
+    xdg.configFile = lib.mkIf (name == "marten") {
+      "near-cli/config.toml" = {
+        force = true;
+        text = ''
+        version = "5"
+        credentials_home_dir = "${config.home.homeDirectory}/.near-credentials"
+
+        [network_connection.mainnet]
+        network_name = "mainnet"
+        rpc_url = "https://near.drpc.org/"
+        wallet_url = "https://app.mynearwallet.com/"
+        explorer_transaction_url = "https://explorer.near.org/transactions/"
+        linkdrop_account_id = "near"
+        near_social_db_contract_account_id = "social.near"
+        fastnear_url = "https://api.fastnear.com/"
+        staking_pools_factory_account_id = "poolv1.near"
+        coingecko_url = "https://api.coingecko.com/"
+        mpc_contract_account_id = "v1.signer"
+        nearblocks_url = "https://api.nearblocks.io/"
+
+        [network_connection.testnet]
+        network_name = "testnet"
+        rpc_url = "https://near-testnet.drpc.org/"
+        wallet_url = "https://testnet.mynearwallet.com/"
+        explorer_transaction_url = "https://explorer.testnet.near.org/transactions/"
+        linkdrop_account_id = "testnet"
+        near_social_db_contract_account_id = "v1.social08.testnet"
+        faucet_url = "https://helper.nearprotocol.com/account"
+        fastnear_url = "https://test.api.fastnear.com/"
+        staking_pools_factory_account_id = "pool.f863973.m0"
+        mpc_contract_account_id = "v1.signer-prod.testnet"
+        nearblocks_url = "https://api-testnet.nearblocks.io/"
+        '';
+      };
+    };
+
     programs.helix = {
       enable = true;
       settings = {
