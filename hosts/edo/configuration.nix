@@ -196,6 +196,15 @@ in
   # falls back to a poor or missing picker.
   xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
 
+  # Hyprland runs no XSETTINGS daemon, and GTK3 only asks the portal above for
+  # desktop settings when this is set — reading the schemas off XDG_DATA_DIRS
+  # is not enough, its Wayland backend ignores them. Without it gtk-xft-dpi
+  # stays at its "unset" sentinel of -1, and WebKitGTK feeds that straight into
+  # its DPI scaling: devicePixelRatio comes out NEGATIVE (scale 2 * -1/96), so
+  # every rem-based layout collapses — tiny text, wrong proportions, images
+  # sized to nothing. Hits any webkit2gtk app, e.g. Tauri dev builds.
+  environment.sessionVariables.GTK_USE_PORTAL = "1";
+
   environment.variables = {
     VISUAL = "hx";
     EDITOR = "hx";
