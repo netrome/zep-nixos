@@ -667,6 +667,40 @@ in
       enable = true;
       mouse = true;
     };
+
+    # Claude Code's own preferences, which it otherwise writes to
+    # ~/.claude/settings.json itself when they're changed through /config.
+    # package = null because claude-code is in environment.systemPackages
+    # above — the same split used for hyprland and hyprlock.
+    #
+    # Note the tradeoff: home-manager writes settings.json as a store symlink,
+    # so /config can no longer save these keys and reports a write error. That's
+    # the intended direction (change them here, rebuild), but it does mean the
+    # in-app settings UI is now read-only for anything listed below.
+    programs.claude-code = {
+      enable = true;
+      package = null;
+      settings = {
+        theme = "dark";
+        tui = "fullscreen";
+
+        # Attention notifications. Claude's default is "auto", which only
+        # resolves for Apple Terminal, iTerm2, kitty and ghostty and silently
+        # does nothing anywhere else; "terminal_bell" is a bare \a, which is
+        # what Alacritty understands. From there: Alacritty turns a bell in an
+        # unfocused window into an xdg-activation request, Hyprland flags the
+        # window urgent, and waybar paints the workspace button with the
+        # .urgent rule in waybar-style.css. Same chain codex rides by default.
+        preferredNotifChannel = "terminal_bell";
+      };
+    };
+
+    # See the force note on xdg.mimeApps above — the same reasoning, opposite
+    # conclusion. claude-code has already written this file on every machine
+    # where it has run, so without force the first rebuild stops for each user;
+    # and unlike mimeapps.list there's nothing to preserve, because every key
+    # it holds is declared above.
+    home.file."${config.home.homeDirectory}/.claude/settings.json".force = true;
   });
 
   nixpkgs.config.allowUnfreePredicate =

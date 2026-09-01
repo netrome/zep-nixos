@@ -237,6 +237,23 @@ in
       enable = true;
       mouse = true;
     };
+
+    # Same Claude Code settings as edo, including the notification channel:
+    # "terminal_bell" is a bare \a, so over SSH it rings in whatever terminal
+    # is attached rather than on this headless box. tmux forwards it with its
+    # default bell-action, so a session left running in tmux still gets your
+    # attention locally. See edo's copy for the /config tradeoff this implies.
+    programs.claude-code = {
+      enable = true;
+      package = null;
+      settings = {
+        theme = "dark";
+        tui = "fullscreen";
+        preferredNotifChannel = "terminal_bell";
+      };
+    };
+
+    home.file."${config.home.homeDirectory}/.claude/settings.json".force = true;
   });
 
   nixpkgs.config.allowUnfreePredicate =
