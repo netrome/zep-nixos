@@ -114,6 +114,7 @@ in
     git
     vim
     firefox
+    libreoffice-qt6
     ripgrep
     fd
     jq
