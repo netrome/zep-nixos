@@ -616,6 +616,44 @@ in
     # mimeapps.list to begin with.
     xdg.configFile."mimeapps.list" = lib.mkIf (name == "marten") { force = true; };
 
+    # Same near-cli config as zep. The public FASTNEAR RPC endpoints are rate
+    # limited, so use dRPC for JSON-RPC requests while retaining FASTNEAR's
+    # separate API endpoints. force because near-cli-rs already wrote its own
+    # config.toml here — see the note on xdg.mimeApps above.
+    xdg.configFile."near-cli/config.toml" = lib.mkIf (name == "marten") {
+      force = true;
+      text = ''
+        version = "5"
+        credentials_home_dir = "${config.home.homeDirectory}/.near-credentials"
+
+        [network_connection.mainnet]
+        network_name = "mainnet"
+        rpc_url = "https://near.drpc.org/"
+        wallet_url = "https://app.mynearwallet.com/"
+        explorer_transaction_url = "https://explorer.near.org/transactions/"
+        linkdrop_account_id = "near"
+        near_social_db_contract_account_id = "social.near"
+        fastnear_url = "https://api.fastnear.com/"
+        staking_pools_factory_account_id = "poolv1.near"
+        coingecko_url = "https://api.coingecko.com/"
+        mpc_contract_account_id = "v1.signer"
+        nearblocks_url = "https://api.nearblocks.io/"
+
+        [network_connection.testnet]
+        network_name = "testnet"
+        rpc_url = "https://near-testnet.drpc.org/"
+        wallet_url = "https://testnet.mynearwallet.com/"
+        explorer_transaction_url = "https://explorer.testnet.near.org/transactions/"
+        linkdrop_account_id = "testnet"
+        near_social_db_contract_account_id = "v1.social08.testnet"
+        faucet_url = "https://helper.nearprotocol.com/account"
+        fastnear_url = "https://test.api.fastnear.com/"
+        staking_pools_factory_account_id = "pool.f863973.m0"
+        mpc_contract_account_id = "v1.signer-prod.testnet"
+        nearblocks_url = "https://api-testnet.nearblocks.io/"
+      '';
+    };
+
     # Same helix setup as zep.
     programs.helix = {
       enable = true;
