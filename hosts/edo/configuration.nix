@@ -115,6 +115,7 @@ in
   environment.systemPackages = with pkgs; [
     alacritty
     git
+    gh
     vim
     firefox
     libreoffice-qt6
