@@ -49,9 +49,10 @@ in
     "2a01:4ff:ff00::add:2"
   ];
 
-  # Only SSH is reachable from outside. Anything served later must be
-  # opened here explicitly.
+  # Only explicitly listed services are reachable from outside.
   networking.firewall.enable = true;
+  # Hackathon development server.
+  networking.firewall.allowedTCPPorts = [ 8080 ];
 
   # Fresh host keys are generated on install. The pre-wipe host keys and
   # ~/.ssh/id_rsa were read during the 2026-07-28 incident — never restore them.
