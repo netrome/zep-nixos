@@ -1,4 +1,4 @@
-{ pkgs, lib, slackmdSrc, mojimeSrc, nearCliSrc, ... }:
+{ pkgs, lib, slackmdSrc, mojimeSrc, nearCliSrc, codexPackage, ... }:
 let
   # Sources come from flake inputs (flake = false), so revisions are pinned in
   # flake.lock and bumped with `nix flake update slackmd mojime near-cli-rs`.
@@ -128,7 +128,7 @@ in
     fastfetch
     tokei
     claude-code
-    codex
+    codexPackage
     near-cli-rs # provides `near`; see ../../pkgs/near-cli-rs.nix
 
     # Keychain tooling, both talking to the gnome-keyring service above.

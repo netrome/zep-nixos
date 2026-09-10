@@ -1,4 +1,4 @@
-{ pkgs, lib, mindex, nearCliSrc, ... }:
+{ pkgs, lib, mindex, nearCliSrc, codexPackage, ... }:
 
 let
   # Source comes from a flake input (flake = false), so the revision is pinned in
@@ -121,7 +121,7 @@ in
     htop
     rsync
     claude-code
-    codex
+    codexPackage
     tree
     fastfetch
     tokei

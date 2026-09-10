@@ -3,6 +3,8 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # Track Codex independently so it can move faster than the stable system.
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
     mindex.url = "github:netrome/mindex";
@@ -30,10 +32,14 @@
     near-cli-rs.flake = false;
   };
 
-  outputs = { self, nixpkgs, disko, mindex, agenix, home-manager, zink, slackmd, mojime, near-cli-rs }: {
+  outputs = { self, nixpkgs, nixpkgs-unstable, disko, mindex, agenix, home-manager, zink, slackmd, mojime, near-cli-rs }: {
     nixosConfigurations.zep = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { inherit mindex zink; nearCliSrc = near-cli-rs; };
+      specialArgs = {
+        inherit mindex zink;
+        nearCliSrc = near-cli-rs;
+        codexPackage = nixpkgs-unstable.legacyPackages.x86_64-linux.codex;
+      };
       modules = [
         disko.nixosModules.disko
         agenix.nixosModules.default
@@ -50,7 +56,12 @@
 
     nixosConfigurations.edo = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      specialArgs = { slackmdSrc = slackmd; mojimeSrc = mojime; nearCliSrc = near-cli-rs; };
+      specialArgs = {
+        slackmdSrc = slackmd;
+        mojimeSrc = mojime;
+        nearCliSrc = near-cli-rs;
+        codexPackage = nixpkgs-unstable.legacyPackages.x86_64-linux.codex;
+      };
       modules = [
         disko.nixosModules.disko
         home-manager.nixosModules.home-manager
