@@ -295,22 +295,41 @@ in
           # Both externals are 2560 wide at scale 1, so the laptop starts at
           # 2*2560, and both are 1440 tall, so they sit at y=0 with the laptop
           # dropped to y=440 as in office-1.
+          #
+          # Refresh rates are pinned here, unlike office-1. Both externals hang
+          # off ONE DisplayPort link through an MST hub, so they share its
+          # bandwidth. Letting each take its highest mode (144Hz + 100Hz, ~24Gbps
+          # at 24bpp) overruns HBR2 x4 (~17.3Gbps usable): the link fails its ACT
+          # handshake, drops both monitors, and retrains on a ~13s loop. The
+          # kernel says so directly — i915 "Failed to get ACT after 3000 ms".
+          #
+          # Both sit at 60Hz deliberately: ~11.6Gbps, the most conservative pair
+          # available and well under any plausible ceiling. This is a floor to
+          # get a stable desk, not a measured optimum — the real link rate and
+          # lane count have never been read, and DSC support is unknown. Raise
+          # ONE output at a time and watch `journalctl -k -g ACT`; any hit means
+          # back it off. The AOC tops out at 144Hz here because it is on an HDMI
+          # path (the panel itself does 180Hz over DisplayPort).
+          #
+          # Exact rates matter: kanshi matches to within 0.05Hz and fails the
+          # whole profile otherwise, so these are the advertised values from
+          # `wlr-randr`, not rounded ones. The MSI's 60Hz mode really is
+          # 59.951Hz, which "@60Hz" would match by only 1mHz of slack.
           profile = {
             name = "office-2";
             outputs = [
               {
                 criteria = "Microstep MSI MP275Q PC3M805A00754";
-                mode = "2560x1440";
+                mode = "2560x1440@59.951Hz";
                 position = "0,0";
                 scale = 1.0;
               }
               {
-                # Bare mode takes the highest rate at 2560x1440, i.e. 144Hz.
                 # This panel also does 3840x2160, but only at 60Hz, and mixing a
                 # scaled 4K into a row of 1440p externals would break the shared
                 # y=0 baseline — so it stays at its native-for-this-row 1440p.
                 criteria = "AOC Q27G42XE 2S6S2HA004483";
-                mode = "2560x1440";
+                mode = "2560x1440@60Hz";
                 position = "2560,0";
                 scale = 1.0;
               }
