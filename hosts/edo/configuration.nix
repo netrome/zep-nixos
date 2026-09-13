@@ -242,6 +242,93 @@ in
       extraConfig = builtins.readFile ./hyprland.lua;
     };
 
+    # Monitor layout, one profile per room. Hyprland implements
+    # wlr-output-management (v4), so kanshi drives it exactly as it did on sway.
+    #
+    # This replaces the hl.monitor() rules that used to live in hyprland.lua:
+    # those attach a position to a *monitor*, not to a layout, so a single eDP-1
+    # rule had to serve every room and the externals needed hand-computed
+    # offsets to line up against it. Profiles make each room independent.
+    #
+    # kanshi owns the geometry outright — hyprland.lua is down to a catch-all on
+    # purpose, since two daemons reapplying rules on hotplug race each other.
+    #
+    # Adding a room: plug in, run `wlr-randr`, and read Make/Model/Serial off the
+    # output. criteria is "$make $model $serial" — NOT the quoted description
+    # wlr-randr prints, which has the connector appended ("… (HDMI-A-1)") and so
+    # changes between plug-ins. Missing fields are spelled "Unknown".
+    services.kanshi = lib.mkIf (name == "marten") {
+      enable = true;
+      settings = [
+        {
+          # Home office #1: 34" ultrawide LEFT of the laptop.
+          profile = {
+            name = "office-1";
+            outputs = [
+              {
+                criteria = "Microstep MSI MAG342CQR DB6H261C02870";
+                # No refresh rate on purpose. kanshi matches a requested rate to
+                # within 0.05Hz and FAILS THE WHOLE PROFILE if nothing is that
+                # close — and panels advertise rates like 99.945999Hz, which
+                # "@100Hz" misses by 54mHz. Bare "WxH" takes the highest rate at
+                # that resolution instead, which is what we want on every output
+                # here (50Hz on the ultrawide, ~100Hz on the 27", 240Hz on eDP-1).
+                #
+                # 50Hz is a link limit, not a preference: this panel does 144Hz
+                # but only gets ~HDMI-1.4 bandwidth here, so 3440x1440 caps at 50.
+                mode = "3440x1440";
+                position = "0,0";
+                scale = 1.0;
+              }
+              {
+                # 1440 - (1600/1.6) = 440 bottom-aligns the laptop against it.
+                criteria = "eDP-1";
+                mode = "2560x1600";
+                position = "3440,440";
+                scale = 1.6;
+              }
+            ];
+          };
+        }
+        {
+          # Home office #2: 27" LEFT of the laptop. Same bottom alignment, but
+          # the laptop sits 880px further left because the external is narrower.
+          profile = {
+            name = "office-2";
+            outputs = [
+              {
+                criteria = "Microstep MSI MP275Q PC3M805A00754";
+                mode = "2560x1440";
+                position = "0,0";
+                scale = 1.0;
+              }
+              {
+                criteria = "eDP-1";
+                mode = "2560x1600";
+                position = "2560,440";
+                scale = 1.6;
+              }
+            ];
+          };
+        }
+        {
+          # Laptop alone. kanshi requires every connected output to be matched,
+          # so this only applies when nothing else is plugged in.
+          profile = {
+            name = "undocked";
+            outputs = [
+              {
+                criteria = "eDP-1";
+                mode = "2560x1600";
+                position = "0,0";
+                scale = 1.6;
+              }
+            ];
+          };
+        }
+      ];
+    };
+
     # Screen lock. The NixOS programs.hyprlock module above installs the package
     # and the PAM service; null keeps home-manager from adding a second copy.
     programs.hyprlock = lib.mkIf (name == "marten") {

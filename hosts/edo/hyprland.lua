@@ -16,45 +16,23 @@
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 --
--- Hyprland reapplies these on hotplug, so no kanshi is needed; a second daemon
--- would only race this one for control of the outputs.
+-- Geometry is NOT configured here — kanshi owns it, see services.kanshi in
+-- ../../hosts/edo/configuration.nix. Per-monitor hl.monitor() rules cannot
+-- express per-room layouts: the position is attached to the monitor, so one
+-- eDP-1 rule has to serve every room at once, and bottom-aligning the laptop
+-- against externals of different widths degenerates into hand-computed offsets.
 --
--- Catch-all first — later rules override it, so anything unknown still lights up.
+-- Keep this to the catch-all only. Adding specific rules back would make
+-- Hyprland reapply its own geometry on hotplug and fight kanshi for the same
+-- outputs — see hyprwm/Hyprland#15493 for the resulting state conflicts.
+--
+-- This still runs first at startup and on hotplug, so an unknown display lights
+-- up at a sane mode before kanshi has picked a profile (or if none matches).
 hl.monitor({
     output   = "",
     mode     = "preferred",
     position = "auto",
     scale    = "auto",
-})
-
--- Home office #1: 34" ultrawide to the LEFT of the laptop. Rules for monitors
--- that are not connected remain inactive, so this can coexist with office #2.
-hl.monitor({
-    output   = "desc:Microstep MSI MAG342CQR DB6H261C02870",
-    mode     = "3440x1440@50",
-    position = "0x0",
-    scale    = 1,
-})
-
--- Home office #2: first 27" monitor to the LEFT of the laptop.
---
--- Matched on description rather than "DP-3" because connector numbering can
--- change between plug-ins; the description is stable per physical monitor.
-hl.monitor({
-    output   = "desc:Microstep MSI MP275Q PC3M805A00754",
-    mode     = "2560x1440@100",
-    -- Keep its right edge at x=3440, like the wider office #1 display.
-    position = "880x0",
-    scale    = 1,
-})
-
--- Laptop panel to the right of either external display. Both are 1440 logical
--- pixels tall; the laptop is 1600/1.6 = 1000, so y=440 bottom-aligns them.
-hl.monitor({
-    output   = "eDP-1",
-    mode     = "2560x1600@240",
-    position = "3440x440",
-    scale    = 1.6,
 })
 
 
