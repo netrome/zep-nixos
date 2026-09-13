@@ -27,17 +27,8 @@ hl.monitor({
     scale    = "auto",
 })
 
--- Home desk: 34" ultrawide to the LEFT of the laptop.
---
--- Matched on description rather than "DP-3" because connector numbering can
--- change between plug-ins; the description is stable per physical monitor.
---
--- 50Hz is the ceiling at native resolution over the current cable: the mode
--- list (4K capped at 30, 3440x1440 capped at 50, 1080p up to 120) is the
--- signature of a bandwidth-limited link, most likely USB-C DP alt mode
--- negotiating 2 lanes instead of 4. The panel itself does 144Hz. If a
--- different cable or port ever gives 4 lanes, raise this — 3440x1440@100 and
--- above should then appear in `hyprctl monitors all`.
+-- Home office #1: 34" ultrawide to the LEFT of the laptop. Rules for monitors
+-- that are not connected remain inactive, so this can coexist with office #2.
 hl.monitor({
     output   = "desc:Microstep MSI MAG342CQR DB6H261C02870",
     mode     = "3440x1440@50",
@@ -45,9 +36,20 @@ hl.monitor({
     scale    = 1,
 })
 
--- Laptop panel to the right of it. y=440 bottom-aligns the two (the ultrawide
--- is 1440 tall, this panel is 1600/1.6 = 1000 logical), which matches how they
--- physically sit on the desk. Use y=0 to top-align instead.
+-- Home office #2: first 27" monitor to the LEFT of the laptop.
+--
+-- Matched on description rather than "DP-3" because connector numbering can
+-- change between plug-ins; the description is stable per physical monitor.
+hl.monitor({
+    output   = "desc:Microstep MSI MP275Q PC3M805A00754",
+    mode     = "2560x1440@100",
+    -- Keep its right edge at x=3440, like the wider office #1 display.
+    position = "880x0",
+    scale    = 1,
+})
+
+-- Laptop panel to the right of either external display. Both are 1440 logical
+-- pixels tall; the laptop is 1600/1.6 = 1000, so y=440 bottom-aligns them.
 hl.monitor({
     output   = "eDP-1",
     mode     = "2560x1600@240",
