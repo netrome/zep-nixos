@@ -291,8 +291,10 @@ in
           };
         }
         {
-          # Home office #2: 27" LEFT of the laptop. Same bottom alignment, but
-          # the laptop sits 880px further left because the external is narrower.
+          # Home office #2: MSI | AOC | laptop, left to right, bottom-aligned.
+          # Both externals are 2560 wide at scale 1, so the laptop starts at
+          # 2*2560, and both are 1440 tall, so they sit at y=0 with the laptop
+          # dropped to y=440 as in office-1.
           profile = {
             name = "office-2";
             outputs = [
@@ -303,9 +305,19 @@ in
                 scale = 1.0;
               }
               {
+                # Bare mode takes the highest rate at 2560x1440, i.e. 144Hz.
+                # This panel also does 3840x2160, but only at 60Hz, and mixing a
+                # scaled 4K into a row of 1440p externals would break the shared
+                # y=0 baseline — so it stays at its native-for-this-row 1440p.
+                criteria = "AOC Q27G42XE 2S6S2HA004483";
+                mode = "2560x1440";
+                position = "2560,0";
+                scale = 1.0;
+              }
+              {
                 criteria = "eDP-1";
                 mode = "2560x1600";
-                position = "2560,440";
+                position = "5120,440";
                 scale = 1.6;
               }
             ];
