@@ -360,6 +360,15 @@ in
       ];
     };
 
+    # home-manager restarts a user service when its *unit* changes, and editing
+    # the profiles above changes only ~/.config/kanshi/config. The unit text
+    # stays byte-identical, so the daemon keeps running with whatever it read at
+    # startup and a rebuild silently does nothing — the monitors keep obeying an
+    # old config while the file on disk says otherwise, which is maddening to
+    # debug. Naming the config as a restart trigger makes the unit change too.
+    systemd.user.services.kanshi.Unit.X-Restart-Triggers =
+      lib.mkIf (name == "marten") [ config.xdg.configFile."kanshi/config".source ];
+
     # Screen lock. The NixOS programs.hyprlock module above installs the package
     # and the PAM service; null keeps home-manager from adding a second copy.
     programs.hyprlock = lib.mkIf (name == "marten") {
