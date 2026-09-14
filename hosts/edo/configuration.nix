@@ -251,7 +251,6 @@ in
       settings = {
         general = {
           hide_cursor = true;
-          grace = 0; # no "unlock without password" window
         };
 
         # Blurred snapshot of the session, so no wallpaper file is needed yet.
@@ -335,15 +334,24 @@ in
             timeout = 600;
             on-timeout = "${pkgs.systemd}/bin/loginctl lock-session";
           }
-          # 11 min: display off. Table args, not bare strings — see above.
+          # 15 min: suspend. before_sleep_cmd locks first.
+          #
+          # There is deliberately NO dpms-off listener between the lock and this.
+          # Both externals hang off one DP MST hub (DP-5/DP-6 are MST-virtual
+          # connectors; every physical port reads disconnected), and dpms-off
+          # tears that link down. i915 then intermittently fails to retrain it —
+          # `Failed to get ACT after 3000 ms`, `Step 2 of creating MST payload
+          # failed: -5` — and Hyprland destroys/recreates both outputs every few
+          # seconds in a loop that never settles. hyprlock holds one surface per
+          # output, so an output vanishing under it aborts the lock screen
+          # (hyprlock.cpp:412) and the session is unrecoverable without a reboot.
+          # Cost several reboots between 2026-09-13 and 2026-09-14.
+          #
+          # Suspend re-probes MST from scratch on resume instead of hot-retraining
+          # it, which is the path that actually survives. Hence 15 min rather than
+          # 30: the panels would otherwise stay lit for 20 minutes after locking.
           {
-            timeout = 660;
-            on-timeout = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'";
-            on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'";
-          }
-          # 30 min: suspend. before_sleep_cmd locks first.
-          {
-            timeout = 1800;
+            timeout = 900;
             on-timeout = "${pkgs.systemd}/bin/systemctl suspend";
           }
         ];
