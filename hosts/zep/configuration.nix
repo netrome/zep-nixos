@@ -161,9 +161,9 @@ in
   home-manager.users = lib.genAttrs [ "marten" "dev" "dev-near" ] (name: { config, ... }: {
     home.stateVersion = "26.05";
 
-    # Keep near-cli's network configuration declarative. The public FASTNEAR
-    # RPC endpoints are rate limited, so use dRPC for JSON-RPC requests while
-    # retaining FASTNEAR's separate API endpoints.
+    # Keep near-cli's network configuration declarative. dRPC timed out often
+    # enough to be unusable, so JSON-RPC goes back to FASTNEAR's free endpoints
+    # (rate limited, but they answer).
     xdg.configFile = lib.mkIf (name == "marten") {
       "near-cli/config.toml" = {
         force = true;
@@ -173,7 +173,7 @@ in
 
         [network_connection.mainnet]
         network_name = "mainnet"
-        rpc_url = "https://near.drpc.org/"
+        rpc_url = "https://free.rpc.fastnear.com/"
         wallet_url = "https://app.mynearwallet.com/"
         explorer_transaction_url = "https://explorer.near.org/transactions/"
         linkdrop_account_id = "near"
@@ -186,7 +186,7 @@ in
 
         [network_connection.testnet]
         network_name = "testnet"
-        rpc_url = "https://near-testnet.drpc.org/"
+        rpc_url = "https://rpc.testnet.fastnear.com/"
         wallet_url = "https://testnet.mynearwallet.com/"
         explorer_transaction_url = "https://explorer.testnet.near.org/transactions/"
         linkdrop_account_id = "testnet"

@@ -634,9 +634,9 @@ in
     # mimeapps.list to begin with.
     xdg.configFile."mimeapps.list" = lib.mkIf (name == "marten") { force = true; };
 
-    # Same near-cli config as zep. The public FASTNEAR RPC endpoints are rate
-    # limited, so use dRPC for JSON-RPC requests while retaining FASTNEAR's
-    # separate API endpoints. force because near-cli-rs already wrote its own
+    # Same near-cli config as zep. dRPC timed out often enough to be unusable,
+    # so JSON-RPC goes back to FASTNEAR's free endpoints (rate limited, but
+    # they answer). force because near-cli-rs already wrote its own
     # config.toml here — see the note on xdg.mimeApps above.
     xdg.configFile."near-cli/config.toml" = lib.mkIf (name == "marten") {
       force = true;
@@ -646,7 +646,7 @@ in
 
         [network_connection.mainnet]
         network_name = "mainnet"
-        rpc_url = "https://near.drpc.org/"
+        rpc_url = "https://free.rpc.fastnear.com/"
         wallet_url = "https://app.mynearwallet.com/"
         explorer_transaction_url = "https://explorer.near.org/transactions/"
         linkdrop_account_id = "near"
@@ -659,7 +659,7 @@ in
 
         [network_connection.testnet]
         network_name = "testnet"
-        rpc_url = "https://near-testnet.drpc.org/"
+        rpc_url = "https://rpc.testnet.fastnear.com/"
         wallet_url = "https://testnet.mynearwallet.com/"
         explorer_transaction_url = "https://explorer.testnet.near.org/transactions/"
         linkdrop_account_id = "testnet"
