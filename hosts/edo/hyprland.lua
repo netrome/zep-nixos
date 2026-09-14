@@ -16,23 +16,39 @@
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
 --
--- Geometry is NOT configured here — kanshi owns it, see services.kanshi in
--- ../../hosts/edo/configuration.nix. Per-monitor hl.monitor() rules cannot
--- express per-room layouts: the position is attached to the monitor, so one
--- eDP-1 rule has to serve every room at once, and bottom-aligning the laptop
--- against externals of different widths degenerates into hand-computed offsets.
---
--- Keep this to the catch-all only. Adding specific rules back would make
--- Hyprland reapply its own geometry on hotplug and fight kanshi for the same
--- outputs — see hyprwm/Hyprland#15493 for the resulting state conflicts.
---
--- This still runs first at startup and on hotplug, so an unknown display lights
--- up at a sane mode before kanshi has picked a profile (or if none matches).
+-- Hyprland owns the layout directly. This intentionally supports only office 2;
+-- there is no output-profile daemon racing Hyprland during startup or hotplug.
+-- Keep the catch-all first so an unknown display still lights up, then override
+-- it with the fixed desk layout below.
 hl.monitor({
     output   = "",
     mode     = "preferred",
     position = "auto",
     scale    = "auto",
+})
+
+-- Office 2: MSI | AOC | laptop, left to right and bottom-aligned.
+-- The external displays share one DisplayPort link through an MST hub, so both
+-- stay at 60Hz to avoid exceeding its bandwidth and repeatedly retraining it.
+hl.monitor({
+    output   = "desc:Microstep MSI MP275Q PC3M805A00754",
+    mode     = "2560x1440@59.951",
+    position = "0x0",
+    scale    = 1,
+})
+
+hl.monitor({
+    output   = "desc:AOC Q27G42XE 2S6S2HA004483",
+    mode     = "2560x1440@60",
+    position = "2560x0",
+    scale    = 1,
+})
+
+hl.monitor({
+    output   = "eDP-1",
+    mode     = "2560x1600",
+    position = "5120x440",
+    scale    = 1.6,
 })
 
 
