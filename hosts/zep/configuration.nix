@@ -71,6 +71,14 @@ in
     enable = true;
     autosuggestions.enable = true;
     syntaxHighlighting.enable =  true;
+    # zsh, unlike bash's readline, ships no ^X^E binding: the widget exists
+    # but is an autoloadable function that nothing loads or binds by default.
+    # It opens the current line in $VISUAL (hx, set below).
+    interactiveShellInit = ''
+      autoload -Uz edit-command-line
+      zle -N edit-command-line
+      bindkey '^X^E' edit-command-line
+    '';
   };
 
   programs.starship.enable = true;
