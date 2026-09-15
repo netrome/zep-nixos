@@ -299,7 +299,31 @@ in
           # Everything locks via `loginctl lock-session` rather than by running
           # hyprlock directly, so logind's LockedHint stays truthful and D-Bus
           # consumers (compliance tooling, chrome.idle) can actually see it.
-          lock_cmd = "${pkgs.procps}/bin/pidof hyprlock || ${pkgs.hyprlock}/bin/hyprlock";
+          #
+          # Retried rather than one-shot. hyprlock aborts when an output
+          # vanishes under it (hyprlock.cpp:412, and a segfault in
+          # CSessionLockSurface on the same cause), which the MST link does on
+          # every dock event — four coredumps between 2026-09-13 and 09-15, two
+          # of which forced a reboot. A bare `|| hyprlock` runs once, so a crash
+          # left the session locked with no client to authenticate to:
+          # ext-session-lock-v1 requires the compositor NOT to unlock when the
+          # lock client dies, so the only way out was the power button.
+          #
+          # ~30s of retries (10 x 3s), sized to the observed churn — the
+          # `Failed to get ACT after 3000 ms` errors arrive ~20s apart, so a
+          # shorter window would give up while the link was still settling.
+          # `&& break` exits on a normal unlock, so nothing extra is spawned in
+          # the common case.
+          #
+          # UNVERIFIED whether Hyprland 0.55.4 actually grants the lock to a
+          # replacement client; the protocol only says a compositor *may*
+          # ("Compositors may allow a new client to create a ext_session_lock_v1
+          # object and take responsibility for unlocking the session"). If it
+          # refuses, the new hyprlock gets `finished` and exits, costing 30s and
+          # leaving things exactly as before — so this is free to try. Test by
+          # locking, killing hyprlock by PID from a TTY, and running hyprlock
+          # again with WAYLAND_DISPLAY set.
+          lock_cmd = "${pkgs.procps}/bin/pidof hyprlock || for _ in $(${pkgs.coreutils}/bin/seq 10); do ${pkgs.hyprlock}/bin/hyprlock && break; ${pkgs.coreutils}/bin/sleep 3; done";
           before_sleep_cmd = "${pkgs.systemd}/bin/loginctl lock-session";
           # Dispatchers go through hyprctl as *Lua*, not legacy names: this is a
           # Lua config, so `hyprctl dispatch dpms on` is a syntax error that
